@@ -1,0 +1,32 @@
+{
+  "cached_at": "2026-04-15T11:19:31.859405",
+  "data": [
+    {
+      "player": "Thibaut Courtois",
+      "position": "Goalkeeper",
+      "injury_type": "Muscle tear",
+      "status": "Baja",
+      "details": "Muscle tear | Desde 17/03/2026 | Vuelve 01/05/2026",
+      "return_date": "01/05/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Rodrygo",
+      "position": "Right Winger",
+      "injury_type": "Cruciate ligament tear",
+      "status": "Baja",
+      "details": "Cruciate ligament tear | Desde 03/03/2026 | Vuelve 30/09/2026",
+      "return_date": "30/09/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Raúl Asencio",
+      "position": "Centre-Back",
+      "injury_type": "Stomach flu",
+      "status": "Baja",
+      "details": "Stomach flu | Desde 13/04/2026 | Vuelve 17/04/2026",
+      "return_date": "17/04/2026",
+      "source": "transfermarkt"
+    }
+  ]
+}

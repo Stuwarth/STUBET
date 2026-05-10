@@ -1,0 +1,23 @@
+{
+  "cached_at": "2026-04-19T19:03:56.082649",
+  "data": [
+    {
+      "player": "José María Giménez",
+      "position": "Centre-Back",
+      "injury_type": "Muscle injury",
+      "status": "Baja",
+      "details": "Muscle injury | Desde 07/04/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Dávid Hancko",
+      "position": "Centre-Back",
+      "injury_type": "Ankle injury",
+      "status": "Baja",
+      "details": "Ankle injury | Desde 08/04/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "cached_at": "2026-04-15T11:37:26.853948",
+  "data": [
+    {
+      "player": "Aurelien Tchouameni",
+      "position": "M",
+      "injury_type": "Suspensión",
+      "status": "Suspendido",
+      "details": "Suspension",
+      "source": "rotowire",
+      "return_date": "<i>Subscribers Only</i>"
+    },
+    {
+      "player": "Thibaut Courtois",
+      "position": "G",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "return_date": "01/05/2026",
+      "source": "sofascore"
+    },
+    {
+      "player": "Rodrygo",
+      "position": "F",
+      "injury_type": "Cruciate Ligament Injury",
+      "status": "Baja",
+      "details": "Cruciate Ligament Injury",
+      "return_date": "30/09/2026",
+      "source": "sofascore"
+    },
+    {
+      "player": "Raúl Asencio",
+      "position": "Centre-Back",
+      "injury_type": "Stomach flu",
+      "status": "Baja",
+      "details": "Stomach flu | Desde 13/04/2026 | Vuelve 17/04/2026",
+      "source": "transfermarkt",
+      "return_date": "17/04/2026"
+    },
+    {
+      "player": "Joan Martínez",
+      "position": "D",
+      "injury_type": "Hamstring Injury",
+      "status": "Baja",
+      "details": "Hamstring Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Víctor Valdepeñas",
+      "position": "D",
+      "injury_type": "Thigh Injury",
+      "status": "Duda",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    }
+  ]
+}

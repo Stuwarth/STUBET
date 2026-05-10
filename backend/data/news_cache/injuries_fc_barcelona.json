@@ -1,0 +1,23 @@
+{
+  "cached_at": "2026-04-14T12:00:31.487154",
+  "data": [
+    {
+      "player": "Raphinha",
+      "position": "Left Winger",
+      "injury_type": "Hamstring injury",
+      "status": "Baja",
+      "details": "Hamstring injury | Desde 28/03/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Andreas Christensen",
+      "position": "Centre-Back",
+      "injury_type": "Ligament tear",
+      "status": "Baja",
+      "details": "Ligament tear | Desde 21/12/2025 | Vuelve 30/04/2026",
+      "return_date": "30/04/2026",
+      "source": "transfermarkt"
+    }
+  ]
+}

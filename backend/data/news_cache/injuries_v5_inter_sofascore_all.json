@@ -1,0 +1,40 @@
+{
+  "cached_at": "2026-04-17T15:25:28.563697",
+  "data": [
+    {
+      "player": "Petar Sučić",
+      "position": "M",
+      "injury_type": "Suspension por acumulacion de amarillas",
+      "status": "Suspendido",
+      "details": "yellow_card_accumulation_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Yann Bisseck",
+      "position": "D",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "return_date": "20/04/2026",
+      "source": "sofascore"
+    },
+    {
+      "player": "Lautaro Martínez",
+      "position": "Centre-Forward",
+      "injury_type": "Muscle injury",
+      "status": "Baja",
+      "details": "Muscle injury | Desde 10/04/2026 | Vuelve 26/04/2026",
+      "return_date": "26/04/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Alessandro Bastoni",
+      "position": "D",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "return_date": "20/04/2026",
+      "source": "sofascore"
+    }
+  ]
+}

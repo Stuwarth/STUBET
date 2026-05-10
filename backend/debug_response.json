@@ -1,0 +1,1433 @@
+{
+  "status": "success",
+  "event_id": 13260038,
+  "event": {
+    "eventState": {},
+    "tournament": {
+      "name": "Liga 4 Maramureș U19 - Seria Nord",
+      "slug": "liga-4-maramures-junior-seria-nord",
+      "category": {
+        "name": "Romania Amateur",
+        "slug": "romania-amateur",
+        "sport": {
+          "name": "Football",
+          "slug": "football",
+          "id": 1
+        },
+        "priority": 0,
+        "country": {
+          "alpha2": "RO",
+          "alpha3": "ROU",
+          "name": "Romania",
+          "slug": "romania"
+        },
+        "id": 1599,
+        "flag": "romania",
+        "alpha2": "RO",
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "رومانيا هواة",
+            "ru": "Румыния Любители"
+          },
+          "shortNameTranslation": {}
+        }
+      },
+      "uniqueTournament": {
+        "name": "Liga 4 Maramureș U19",
+        "slug": "liga-4-maramures-junior",
+        "primaryColorHex": "#245981",
+        "secondaryColorHex": "#0a7fbc",
+        "category": {
+          "name": "Romania Amateur",
+          "slug": "romania-amateur",
+          "sport": {
+            "name": "Football",
+            "slug": "football",
+            "id": 1
+          },
+          "priority": 0,
+          "country": {
+            "alpha2": "RO",
+            "alpha3": "ROU",
+            "name": "Romania",
+            "slug": "romania"
+          },
+          "id": 1599,
+          "flag": "romania",
+          "alpha2": "RO",
+          "fieldTranslations": {
+            "nameTranslation": {
+              "ar": "رومانيا هواة",
+              "ru": "Румыния Любители"
+            },
+            "shortNameTranslation": {}
+          }
+        },
+        "userCount": 34,
+        "hasRounds": true,
+        "hasPerformanceGraphFeature": false,
+        "country": {},
+        "id": 24445,
+        "hasEventPlayerStatistics": false,
+        "displayInverseHomeAwayTeams": false,
+        "fieldTranslations": {
+          "nameTranslation": {
+            "ar": "الدوري 4 ماراموريش تحت 19"
+          },
+          "shortNameTranslation": {}
+        }
+      },
+      "priority": 0,
+      "isGroup": true,
+      "groupName": "Seria Nord",
+      "competitionType": 1,
+      "id": 143260,
+      "fieldTranslations": {
+        "nameTranslation": {
+          "ar": "دوري مارياموريس تحت 19، السلسلة الشمالية"
+        },
+        "shortNameTranslation": {}
+      }
+    },
+    "season": {
+      "name": "21/22",
+      "year": "21/22",
+      "editor": true,
+      "id": 70125
+    },
+    "roundInfo": {
+      "round": 1
+    },
+    "customId": "cprisVzri",
+    "status": {
+      "code": 100,
+      "description": "Ended",
+      "type": "finished"
+    },
+    "winnerCode": 1,
+    "homeTeam": {
+      "name": "CSO Borșa U19",
+      "slug": "cso-borsa-u19",
+      "shortName": "CSO Borșa U19",
+      "gender": "M",
+      "sport": {
+        "name": "Football",
+        "slug": "football",
+        "id": 1
+      },
+      "userCount": 2,
+      "nameCode": "CBU",
+      "national": false,
+      "type": 0,
+      "country": {
+        "alpha2": "RO",
+        "alpha3": "ROU",
+        "name": "Romania",
+        "slug": "romania"
+      },
+      "id": 1043745,
+      "fullName": "CSO Borșa U19",
+      "subTeams": [],
+      "teamColors": {
+        "primary": "#374df5",
+        "secondary": "#374df5",
+        "text": "#ffffff"
+      },
+      "fieldTranslations": {
+        "nameTranslation": {
+          "ar": "سي إس أو بورشا تحت 19"
+        },
+        "shortNameTranslation": {
+          "ar": "سي إس أو بورشا تحت 19"
+        }
+      },
+      "createdByEditor": true,
+      "timeActive": []
+    },
+    "awayTeam": {
+      "name": "CS Zorile Moisei U19",
+      "slug": "cs-zorile-moisei-u19",
+      "shortName": "Zorile Moisei U19",
+      "gender": "M",
+      "sport": {
+        "name": "Football",
+        "slug": "football",
+        "id": 1
+      },
+      "userCount": 34,
+      "nameCode": "CZM",
+      "national": false,
+      "type": 0,
+      "country": {
+        "alpha2": "RO",
+        "alpha3": "ROU",
+        "name": "Romania",
+        "slug": "romania"
+      },
+      "id": 1043252,
+      "fullName": "CS Zorile Moisei U19",
+      "subTeams": [],
+      "teamColors": {
+        "primary": "#374df5",
+        "secondary": "#374df5",
+        "text": "#ffffff"
+      },
+      "fieldTranslations": {
+        "nameTranslation": {
+          "ar": "سي إس زوريل مويسي تحت 19"
+        },
+        "shortNameTranslation": {
+          "ar": "مويسي تحت 19"
+        }
+      },
+      "createdByEditor": true,
+      "timeActive": []
+    },
+    "homeScore": {
+      "current": 6,
+      "display": 6
+    },
+    "awayScore": {
+      "current": 0,
+      "display": 0
+    },
+    "coverage": -1,
+    "time": {},
+    "changes": {
+      "changeTimestamp": 0
+    },
+    "hasGlobalHighlights": false,
+    "crowdsourcingDataDisplayEnabled": false,
+    "id": 13260038,
+    "defaultPeriodCount": 2,
+    "defaultPeriodLength": 45,
+    "defaultOvertimeLength": 15,
+    "slug": "cso-borsa-u19-cs-zorile-moisei-u19",
+    "startTimestamp": 1632049200,
+    "finalResultOnly": false,
+    "feedLocked": false,
+    "createdByNickname": "Ovidiu Ciocotisan",
+    "eventEditorName": "Ovidiu Ciocotisan",
+    "eventEditor": {
+      "id": "631c4eda3f66308de607ba80",
+      "name": "Ovidiu Ciocotisan"
+    },
+    "showTotoPromo": true,
+    "isEditor": true,
+    "crowdsourcingEnabled": true
+  },
+  "event_summary": {
+    "id": 13260038,
+    "slug": "cso-borsa-u19-cs-zorile-moisei-u19",
+    "status_type": "finished",
+    "status": "Ended",
+    "start_timestamp": 1632049200,
+    "kickoff_utc": "2021-09-19T11:00:00+00:00",
+    "home_team": {
+      "id": 1043745,
+      "name": "CSO Borșa U19",
+      "short_name": "CSO Borșa U19",
+      "logo": "https://api.sofascore.app/api/v1/team/1043745/image",
+      "score": 6
+    },
+    "away_team": {
+      "id": 1043252,
+      "name": "CS Zorile Moisei U19",
+      "short_name": "Zorile Moisei U19",
+      "logo": "https://api.sofascore.app/api/v1/team/1043252/image",
+      "score": 0
+    },
+    "tournament": "Liga 4 Maramureș U19 - Seria Nord",
+    "category": "Romania Amateur",
+    "round": null,
+    "venue": null
+  },
+  "lineup": {
+    "confirmed": false,
+    "status": "closed",
+    "label": "Partido en curso o finalizado",
+    "countdown_minutes": -2433726,
+    "home": {
+      "formation": null,
+      "starters": [],
+      "bench": [],
+      "missing": []
+    },
+    "away": {
+      "formation": null,
+      "starters": [],
+      "bench": [],
+      "missing": []
+    }
+  },
+  "incidents": [],
+  "statistics": [],
+  "graph": [],
+  "history": {
+    "h2h": [
+      {
+        "event_id": 13263299,
+        "start_timestamp": 1568548800,
+        "match_date": "2019-09-15",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043745,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 1,
+        "away_score": 2,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      }
+    ],
+    "home_last10": [
+      {
+        "event_id": 13263324,
+        "start_timestamp": 1571565600,
+        "match_date": "2019-10-20",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043812,
+        "away_team_id": 1043745,
+        "home_team_name": "CSM Sighetu Marmației U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 8,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13263316,
+        "start_timestamp": 1570356000,
+        "match_date": "2019-10-06",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043745,
+        "away_team_id": 1043256,
+        "home_team_name": "CSO Borșa U19",
+        "away_team_name": "AS Iza Dragomirești U19",
+        "home_score": 1,
+        "away_score": 2,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13263310,
+        "start_timestamp": 1569758400,
+        "match_date": "2019-09-29",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043257,
+        "away_team_id": 1043745,
+        "home_team_name": "CSO Bradul Vişeu U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 4,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13263304,
+        "start_timestamp": 1569153600,
+        "match_date": "2019-09-22",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043745,
+        "away_team_id": 1043253,
+        "home_team_name": "CSO Borșa U19",
+        "away_team_name": "ACS Recolta Săliștea de Sus U19",
+        "home_score": 11,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13263299,
+        "start_timestamp": 1568548800,
+        "match_date": "2019-09-15",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043745,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 1,
+        "away_score": 2,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13263292,
+        "start_timestamp": 1567944000,
+        "match_date": "2019-09-08",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043745,
+        "away_team_id": 1043258,
+        "home_team_name": "CSO Borșa U19",
+        "away_team_name": "ACS Avântul Bârsana U19",
+        "home_score": 3,
+        "away_score": 3,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13261510,
+        "start_timestamp": 1567339200,
+        "match_date": "2019-09-01",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043254,
+        "away_team_id": 1043745,
+        "home_team_name": "ACS Salina Ocna Șugatag U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 0,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13261503,
+        "start_timestamp": 1566734400,
+        "match_date": "2019-08-25",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043745,
+        "away_team_id": 1043251,
+        "home_team_name": "CSO Borșa U19",
+        "away_team_name": "AS Remeți U19",
+        "home_score": 5,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13271715,
+        "start_timestamp": 1496577600,
+        "match_date": "2017-06-04",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043811,
+        "away_team_id": 1043745,
+        "home_team_name": "AS Foresta Câmpulung la Tisa U19",
+        "away_team_name": "CSO Borșa U19",
+        "home_score": 2,
+        "away_score": 7,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13271713,
+        "start_timestamp": 1495972800,
+        "match_date": "2017-05-28",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043745,
+        "away_team_id": 1043251,
+        "home_team_name": "CSO Borșa U19",
+        "away_team_name": "AS Remeți U19",
+        "home_score": 1,
+        "away_score": 3,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      }
+    ],
+    "away_last10": [
+      {
+        "event_id": 13823827,
+        "start_timestamp": 1746959400,
+        "match_date": "2025-05-11",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043258,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "ACS Avântul Bârsana U19",
+        "home_score": 2,
+        "away_score": 5,
+        "league_name": "Liga 4 Maramureș U19 - Playout"
+      },
+      {
+        "event_id": 13823815,
+        "start_timestamp": 1746007200,
+        "match_date": "2025-04-30",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043255,
+        "away_team_id": 1043252,
+        "home_team_name": "ACS Cristalul Cavnic U19",
+        "away_team_name": "CS Zorile Moisei U19",
+        "home_score": 0,
+        "away_score": 3,
+        "league_name": "Liga 4 Maramureș U19 - Playout"
+      },
+      {
+        "event_id": 13248638,
+        "start_timestamp": 1730025000,
+        "match_date": "2024-10-27",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043260,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "CS Bradul Groșii Țibleșului U19",
+        "home_score": 7,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Playout"
+      },
+      {
+        "event_id": 13248600,
+        "start_timestamp": 1729416600,
+        "match_date": "2024-10-20",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043254,
+        "away_team_id": 1043252,
+        "home_team_name": "ACS Salina Ocna Șugatag U19",
+        "away_team_name": "CS Zorile Moisei U19",
+        "home_score": 1,
+        "away_score": 2,
+        "league_name": "Liga 4 Maramureș U19 - Playout"
+      },
+      {
+        "event_id": 13247050,
+        "start_timestamp": 1728811800,
+        "match_date": "2024-10-13",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043258,
+        "away_team_id": 1043252,
+        "home_team_name": "ACS Avântul Bârsana U19",
+        "away_team_name": "CS Zorile Moisei U19",
+        "home_score": 3,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13247032,
+        "start_timestamp": 1728207000,
+        "match_date": "2024-10-06",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043255,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "ACS Cristalul Cavnic U19",
+        "home_score": 3,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13247017,
+        "start_timestamp": 1727868600,
+        "match_date": "2024-10-02",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043254,
+        "away_team_id": 1043252,
+        "home_team_name": "ACS Salina Ocna Șugatag U19",
+        "away_team_name": "CS Zorile Moisei U19",
+        "home_score": 2,
+        "away_score": 1,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13246498,
+        "start_timestamp": 1727004600,
+        "match_date": "2024-09-22",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043251,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "AS Remeți U19",
+        "home_score": 4,
+        "away_score": 5,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13246495,
+        "start_timestamp": 1726399800,
+        "match_date": "2024-09-15",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043257,
+        "away_team_id": 1043252,
+        "home_team_name": "CSO Bradul Vişeu U19",
+        "away_team_name": "CS Zorile Moisei U19",
+        "home_score": 5,
+        "away_score": 0,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      },
+      {
+        "event_id": 13246490,
+        "start_timestamp": 1726057800,
+        "match_date": "2024-09-11",
+        "status_type": "finished",
+        "status_description": "Ended",
+        "home_team_id": 1043252,
+        "away_team_id": 1043256,
+        "home_team_name": "CS Zorile Moisei U19",
+        "away_team_name": "AS Iza Dragomirești U19",
+        "home_score": 2,
+        "away_score": 5,
+        "league_name": "Liga 4 Maramureș U19 - Seria Nord"
+      }
+    ]
+  },
+  "ai_context": {
+    "enabled": true,
+    "history_limit": 10,
+    "target_competition": "Liga 4 Maramureș U19 - Seria Nord",
+    "home_last10": {
+      "sample_count": 10,
+      "stats_available_count": 0,
+      "same_competition_count": 10,
+      "form": {
+        "sample_size": 10,
+        "wins": 5,
+        "draws": 1,
+        "losses": 4,
+        "win_rate": 50.0,
+        "goals_for_avg": 3.3,
+        "goals_against_avg": 2.5,
+        "btts_rate": 90.0,
+        "over25_rate": 90.0
+      },
+      "same_competition_form": {
+        "sample_size": 10,
+        "wins": 5,
+        "draws": 1,
+        "losses": 4,
+        "win_rate": 50.0,
+        "goals_for_avg": 3.3,
+        "goals_against_avg": 2.5,
+        "btts_rate": 90.0,
+        "over25_rate": 90.0
+      },
+      "period_averages": {},
+      "same_competition_period_averages": {},
+      "matches": [
+        {
+          "event_id": 13263324,
+          "start_timestamp": 1571565600,
+          "match_date": "2019-10-20",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSM Sighetu Marmației U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 8,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 8.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13263316,
+          "start_timestamp": 1570356000,
+          "match_date": "2019-10-06",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Borșa U19",
+          "away_team_name": "AS Iza Dragomirești U19",
+          "home_score": 1,
+          "away_score": 2,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 2.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13263310,
+          "start_timestamp": 1569758400,
+          "match_date": "2019-09-29",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Bradul Vişeu U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 4,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 4.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13263304,
+          "start_timestamp": 1569153600,
+          "match_date": "2019-09-22",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Borșa U19",
+          "away_team_name": "ACS Recolta Săliștea de Sus U19",
+          "home_score": 11,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 11.0,
+          "goals_against": 1.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13263299,
+          "start_timestamp": 1568548800,
+          "match_date": "2019-09-15",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 1,
+          "away_score": 2,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 2.0,
+          "goals_against": 1.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13263292,
+          "start_timestamp": 1567944000,
+          "match_date": "2019-09-08",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Borșa U19",
+          "away_team_name": "ACS Avântul Bârsana U19",
+          "home_score": 3,
+          "away_score": 3,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "D",
+          "goals_for": 3.0,
+          "goals_against": 3.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13261510,
+          "start_timestamp": 1567339200,
+          "match_date": "2019-09-01",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "ACS Salina Ocna Șugatag U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 0,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 1.0,
+          "goals_against": 0.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13261503,
+          "start_timestamp": 1566734400,
+          "match_date": "2019-08-25",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Borșa U19",
+          "away_team_name": "AS Remeți U19",
+          "home_score": 5,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 5.0,
+          "goals_against": 1.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13271715,
+          "start_timestamp": 1496577600,
+          "match_date": "2017-06-04",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "AS Foresta Câmpulung la Tisa U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 2,
+          "away_score": 7,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 7.0,
+          "goals_against": 2.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13271713,
+          "start_timestamp": 1495972800,
+          "match_date": "2017-05-28",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Borșa U19",
+          "away_team_name": "AS Remeți U19",
+          "home_score": 1,
+          "away_score": 3,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 3.0,
+          "statistics": []
+        }
+      ]
+    },
+    "away_last10": {
+      "sample_count": 10,
+      "stats_available_count": 9,
+      "same_competition_count": 6,
+      "form": {
+        "sample_size": 10,
+        "wins": 4,
+        "draws": 0,
+        "losses": 6,
+        "win_rate": 40.0,
+        "goals_for_avg": 2.5,
+        "goals_against_avg": 2.8,
+        "btts_rate": 80.0,
+        "over25_rate": 100.0
+      },
+      "same_competition_form": {
+        "sample_size": 6,
+        "wins": 1,
+        "draws": 0,
+        "losses": 5,
+        "win_rate": 16.7,
+        "goals_for_avg": 1.83,
+        "goals_against_avg": 3.5,
+        "btts_rate": 83.3,
+        "over25_rate": 100.0
+      },
+      "period_averages": {
+        "ALL": {
+          "yellow_cards": {
+            "label": "Amarillas",
+            "for_avg": 0.56,
+            "against_avg": 0.78,
+            "edge": -0.22
+          },
+          "red_cards": {
+            "label": "Rojas",
+            "for_avg": 0.11,
+            "against_avg": 0.22,
+            "edge": -0.11
+          }
+        }
+      },
+      "same_competition_period_averages": {
+        "ALL": {
+          "yellow_cards": {
+            "label": "Amarillas",
+            "for_avg": 0.83,
+            "against_avg": 0.67,
+            "edge": 0.16
+          },
+          "red_cards": {
+            "label": "Rojas",
+            "for_avg": 0.17,
+            "against_avg": 0.17,
+            "edge": 0.0
+          }
+        }
+      },
+      "matches": [
+        {
+          "event_id": 13823827,
+          "start_timestamp": 1746959400,
+          "match_date": "2025-05-11",
+          "league_name": "Liga 4 Maramureș U19 - Playout",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "ACS Avântul Bârsana U19",
+          "home_score": 2,
+          "away_score": 5,
+          "same_competition": false,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 0.0,
+                "against": 0.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 2.0,
+          "goals_against": 5.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13823815,
+          "start_timestamp": 1746007200,
+          "match_date": "2025-04-30",
+          "league_name": "Liga 4 Maramureș U19 - Playout",
+          "home_team_name": "ACS Cristalul Cavnic U19",
+          "away_team_name": "CS Zorile Moisei U19",
+          "home_score": 0,
+          "away_score": 3,
+          "same_competition": false,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 3.0,
+          "goals_against": 0.0,
+          "statistics": []
+        },
+        {
+          "event_id": 13248638,
+          "start_timestamp": 1730025000,
+          "match_date": "2024-10-27",
+          "league_name": "Liga 4 Maramureș U19 - Playout",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "CS Bradul Groșii Țibleșului U19",
+          "home_score": 7,
+          "away_score": 1,
+          "same_competition": false,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 0.0,
+                "against": 1.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "W",
+          "goals_for": 7.0,
+          "goals_against": 1.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "0",
+                      "away": "1",
+                      "compare_code": 2,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13248600,
+          "start_timestamp": 1729416600,
+          "match_date": "2024-10-20",
+          "league_name": "Liga 4 Maramureș U19 - Playout",
+          "home_team_name": "ACS Salina Ocna Șugatag U19",
+          "away_team_name": "CS Zorile Moisei U19",
+          "home_score": 1,
+          "away_score": 2,
+          "same_competition": false,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 0.0,
+                "against": 2.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 1.0
+              }
+            }
+          },
+          "result": "W",
+          "goals_for": 2.0,
+          "goals_against": 1.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "2",
+                      "away": "0",
+                      "compare_code": 1,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "1",
+                      "away": "0",
+                      "compare_code": 1,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13247050,
+          "start_timestamp": 1728811800,
+          "match_date": "2024-10-13",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "ACS Avântul Bârsana U19",
+          "away_team_name": "CS Zorile Moisei U19",
+          "home_score": 3,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 1.0,
+                "against": 0.0
+              },
+              "red_cards": {
+                "for": 1.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 3.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "0",
+                      "away": "1",
+                      "compare_code": 2,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "1",
+                      "compare_code": 2,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13247032,
+          "start_timestamp": 1728207000,
+          "match_date": "2024-10-06",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "ACS Cristalul Cavnic U19",
+          "home_score": 3,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 0.0,
+                "against": 0.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "W",
+          "goals_for": 3.0,
+          "goals_against": 1.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13247017,
+          "start_timestamp": 1727868600,
+          "match_date": "2024-10-02",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "ACS Salina Ocna Șugatag U19",
+          "away_team_name": "CS Zorile Moisei U19",
+          "home_score": 2,
+          "away_score": 1,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 2.0,
+                "against": 3.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 1.0,
+          "goals_against": 2.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "3",
+                      "away": "2",
+                      "compare_code": 1,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13246498,
+          "start_timestamp": 1727004600,
+          "match_date": "2024-09-22",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "AS Remeți U19",
+          "home_score": 4,
+          "away_score": 5,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 0.0,
+                "against": 0.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 4.0,
+          "goals_against": 5.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13246495,
+          "start_timestamp": 1726399800,
+          "match_date": "2024-09-15",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CSO Bradul Vişeu U19",
+          "away_team_name": "CS Zorile Moisei U19",
+          "home_score": 5,
+          "away_score": 0,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 1.0,
+                "against": 1.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 1.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 0.0,
+          "goals_against": 5.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "1",
+                      "away": "1",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "1",
+                      "away": "0",
+                      "compare_code": 1,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "event_id": 13246490,
+          "start_timestamp": 1726057800,
+          "match_date": "2024-09-11",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "AS Iza Dragomirești U19",
+          "home_score": 2,
+          "away_score": 5,
+          "same_competition": true,
+          "stats_available": true,
+          "available_periods": [
+            "ALL"
+          ],
+          "period_metrics": {
+            "ALL": {
+              "yellow_cards": {
+                "for": 1.0,
+                "against": 0.0
+              },
+              "red_cards": {
+                "for": 0.0,
+                "against": 0.0
+              }
+            }
+          },
+          "result": "L",
+          "goals_for": 2.0,
+          "goals_against": 5.0,
+          "statistics": [
+            {
+              "period": "ALL",
+              "groups": [
+                {
+                  "group_name": "Match overview",
+                  "items": [
+                    {
+                      "name": "Yellow cards",
+                      "home": "1",
+                      "away": "0",
+                      "compare_code": 1,
+                      "value_type": "event"
+                    },
+                    {
+                      "name": "Red cards",
+                      "home": "0",
+                      "away": "0",
+                      "compare_code": 3,
+                      "value_type": "event"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "h2h": {
+      "sample_count": 1,
+      "stats_available_count": 0,
+      "same_competition_count": 1,
+      "form": {
+        "sample_size": 1,
+        "wins": 1,
+        "draws": 0,
+        "losses": 0,
+        "win_rate": 100.0,
+        "goals_for_avg": 2.0,
+        "goals_against_avg": 1.0,
+        "btts_rate": 100.0,
+        "over25_rate": 100.0
+      },
+      "same_competition_form": {
+        "sample_size": 1,
+        "wins": 1,
+        "draws": 0,
+        "losses": 0,
+        "win_rate": 100.0,
+        "goals_for_avg": 2.0,
+        "goals_against_avg": 1.0,
+        "btts_rate": 100.0,
+        "over25_rate": 100.0
+      },
+      "period_averages": {},
+      "same_competition_period_averages": {},
+      "matches": [
+        {
+          "event_id": 13263299,
+          "start_timestamp": 1568548800,
+          "match_date": "2019-09-15",
+          "league_name": "Liga 4 Maramureș U19 - Seria Nord",
+          "home_team_name": "CS Zorile Moisei U19",
+          "away_team_name": "CSO Borșa U19",
+          "home_score": 1,
+          "away_score": 2,
+          "same_competition": true,
+          "stats_available": false,
+          "available_periods": [],
+          "period_metrics": {},
+          "result": "W",
+          "goals_for": 2.0,
+          "goals_against": 1.0,
+          "statistics": []
+        }
+      ]
+    },
+    "analysis_notes": [
+      "Tendencia de goles alta: Over 2.5 combinado ~96.7%.",
+      "Ambos marcan con frecuencia en forma reciente (~85.0%).",
+      "Misma competencia (Liga 4 Maramureș U19 - Seria Nord) detectada en muestra: local 10, visitante 6."
+    ],
+    "statistics_sources": {
+      "live_playwright": 20
+    },
+    "refresh_used": true,
+    "history_statistics_included": true
+  },
+  "sources": {
+    "event_details": "live_playwright",
+    "lineups": "live_playwright",
+    "incidents": "live_playwright",
+    "statistics": "live_playwright",
+    "graph": "live_playwright"
+  }
+}

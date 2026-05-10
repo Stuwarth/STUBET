@@ -1,0 +1,41 @@
+{
+  "cached_at": "2026-04-15T11:19:26.609955",
+  "data": [
+    {
+      "player": "Sven Ulreich",
+      "position": "Goalkeeper",
+      "injury_type": "Torn muscle bundle",
+      "status": "Baja",
+      "details": "Torn muscle bundle | Desde 15/03/2026 | Vuelve 28/04/2026",
+      "return_date": "28/04/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Leon Klanac",
+      "position": "Goalkeeper",
+      "injury_type": "Hamstring injury",
+      "status": "Baja",
+      "details": "Hamstring injury | Desde 01/01/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Lennart Karl",
+      "position": "Attacking Midfield",
+      "injury_type": "Torn muscle fiber",
+      "status": "Baja",
+      "details": "Torn muscle fiber | Desde 10/04/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Bara Sapoko Ndiaye",
+      "position": "Central Midfield",
+      "injury_type": "No eligibility",
+      "status": "Baja",
+      "details": "No eligibility | Desde 03/01/2026 | Vuelve 30/06/2026",
+      "return_date": "30/06/2026",
+      "source": "transfermarkt"
+    }
+  ]
+}

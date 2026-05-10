@@ -1,0 +1,69 @@
+{
+  "cached_at": "2026-04-28T07:37:13.649262",
+  "data": [
+    {
+      "player": "Wisdom Mike",
+      "position": "F",
+      "injury_type": "Hip Injury",
+      "status": "Baja",
+      "details": "Hip Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Tom Bischof",
+      "position": "M",
+      "injury_type": "Calf Injury",
+      "status": "Baja",
+      "details": "Calf Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Sven Ulreich",
+      "position": "G",
+      "injury_type": "No disponible",
+      "status": "Baja",
+      "details": "No disponible",
+      "source": "sofascore"
+    },
+    {
+      "player": "Serge Gnabry",
+      "position": "M",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Raphael Guerreiro",
+      "position": "D",
+      "injury_type": "Hamstring Injury",
+      "status": "Baja",
+      "details": "Hamstring Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Lennart Karl",
+      "position": "M",
+      "injury_type": "Muscle Injury",
+      "status": "Baja",
+      "details": "Muscle Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "David Daiber",
+      "position": "M",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Cassiano Kiala",
+      "position": "D",
+      "injury_type": "Ankle Injury",
+      "status": "Baja",
+      "details": "Ankle Injury",
+      "source": "sofascore"
+    }
+  ]
+}

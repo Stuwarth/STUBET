@@ -1,0 +1,524 @@
+{
+  "version": "1.0.0",
+  "updated_at": "2026-04-17T22:04:30.433507+00:00",
+  "weights": {
+    "form_recent": 1.0,
+    "h2h": 0.95,
+    "venue_split": 1.03,
+    "goal_trend": 1.0,
+    "btts_trend": 1.0,
+    "absences": 1.1,
+    "suspensions": 1.05,
+    "live_xg": 0.9,
+    "shots_on_target": 0.95
+  },
+  "events": {
+    "13980103": {
+      "meta": {
+        "pre_match_locked_at": "2026-04-17T20:06:42.051134+00:00",
+        "last_analysis_stage": "lineup_confirmed",
+        "last_analysis_at": "2026-04-17T20:07:58.022697+00:00",
+        "last_post_match_at": "2026-04-17T20:09:33.433884+00:00"
+      },
+      "signals": {
+        "lineup_confirmed": {
+          "sent_at": "2026-04-17T20:07:58.844829+00:00",
+          "payload": {
+            "selection": "X2",
+            "stake": {
+              "value": 10,
+              "label": "10",
+              "all_in": null,
+              "justification": "Confianza 91.7%, margen entre mercados 11.2 y estado de alineaciones confirmadas."
+            }
+          }
+        }
+      },
+      "pre_match": {
+        "status": "success",
+        "stage": "pre_match",
+        "generated_at": "2026-04-17T20:06:42.051113+00:00",
+        "event": {
+          "id": 13980103,
+          "home_team": {
+            "id": 2793,
+            "name": "Sassuolo",
+            "short_name": "Sassuolo",
+            "logo": "https://api.sofascore.app/api/v1/team/2793/image",
+            "score": 2
+          },
+          "away_team": {
+            "id": 2704,
+            "name": "Como",
+            "short_name": "Como",
+            "logo": "https://api.sofascore.app/api/v1/team/2704/image",
+            "score": 1
+          },
+          "tournament": "Serie A",
+          "category": "Italy",
+          "round": null,
+          "kickoff_utc": "2026-04-17T16:30:00+00:00",
+          "status": "Ended",
+          "status_type": "finished"
+        },
+        "recent_form": {
+          "home_last10": {
+            "sample_size": 10,
+            "wins": 4,
+            "draws": 2,
+            "losses": 4,
+            "win_rate": 40.0,
+            "goals_for_avg": 1.2,
+            "goals_against_avg": 1.2,
+            "btts_rate": 40.0,
+            "over25_rate": 60.0
+          },
+          "away_last10": {
+            "sample_size": 10,
+            "wins": 6,
+            "draws": 2,
+            "losses": 2,
+            "win_rate": 60.0,
+            "goals_for_avg": 1.7,
+            "goals_against_avg": 0.7,
+            "btts_rate": 20.0,
+            "over25_rate": 50.0
+          }
+        },
+        "h2h_analysis": {
+          "summary": {
+            "sample_size": 2,
+            "wins": 0,
+            "draws": 0,
+            "losses": 2,
+            "win_rate": 0.0,
+            "goals_for_avg": 0.0,
+            "goals_against_avg": 2.5,
+            "btts_rate": 0.0,
+            "over25_rate": 50.0
+          },
+          "sample_size": 2
+        },
+        "home_vs_away_behavior": {
+          "home_team_at_home": {
+            "sample_size": 4,
+            "wins": 1,
+            "draws": 1,
+            "losses": 2,
+            "win_rate": 25.0,
+            "goals_for_avg": 1.5,
+            "goals_against_avg": 1.5,
+            "btts_rate": 75.0,
+            "over25_rate": 75.0
+          },
+          "away_team_away": {
+            "sample_size": 6,
+            "wins": 3,
+            "draws": 1,
+            "losses": 2,
+            "win_rate": 50.0,
+            "goals_for_avg": 1.83,
+            "goals_against_avg": 1.0,
+            "btts_rate": 16.7,
+            "over25_rate": 66.7
+          }
+        },
+        "absences_and_sanctions": {
+          "home": {
+            "total": 7,
+            "injured": 2,
+            "suspended": 2,
+            "doubtful": 3,
+            "impact_score": 6.05
+          },
+          "away": {
+            "total": 2,
+            "injured": 1,
+            "suspended": 0,
+            "doubtful": 1,
+            "impact_score": 1.45
+          },
+          "impact_note": "El local llega mas condicionado por bajas/sanciones."
+        },
+        "psychological_context": {
+          "what_is_at_stake": "Lectura contextual basada en torneo/ronda. Para tabla exacta o objetivos europeos/descenso, se recomienda complementar con standings en tiempo real.",
+          "motivation_level": "media",
+          "lineup_expectation": "titulares confirmados",
+          "home_mood": "momento mixto",
+          "away_mood": "racha positiva"
+        },
+        "scenarios": [
+          {
+            "id": "A",
+            "name": "Titulares y motivacion maxima",
+            "projected_pick": "X2",
+            "confidence_pct": 92.2,
+            "note": "Con titulares y contexto competitivo alto, se mantiene el pick principal."
+          },
+          {
+            "id": "B",
+            "name": "Rotaciones parciales",
+            "projected_pick": "X2",
+            "confidence_pct": 82.2,
+            "note": "Con rotaciones el modelo reduce riesgo y prioriza doble oportunidad."
+          },
+          {
+            "id": "C",
+            "name": "Bajas importantes activas",
+            "projected_pick": "X2",
+            "confidence_pct": 85.2,
+            "note": "Las ausencias de mayor impacto redirigen el sesgo del pick."
+          },
+          {
+            "id": "D",
+            "name": "Factores externos (viaje, clima, doble competencia)",
+            "projected_pick": "Under 2.5",
+            "confidence_pct": 80.2,
+            "note": "Si aparecen condicionantes externos fuertes, se recomienda sesgo conservador."
+          }
+        ],
+        "prediction": {
+          "market": "double_chance",
+          "selection": "X2",
+          "confidence_pct": 89.15,
+          "stake": {
+            "value": 10,
+            "label": "10",
+            "all_in": null,
+            "justification": "Confianza 89.2%, margen entre mercados 11.2 y estado de alineaciones confirmadas."
+          },
+          "bookmaker_odds": null,
+          "implied_probability_pct": null,
+          "reasoning": [
+            "Lectura inversa de ventaja de sede.",
+            "Impacto de bajas favorece al visitante.",
+            "Suspensiones activas ajustan probabilidad de no perder."
+          ],
+          "drivers": [
+            {
+              "key": "venue_split",
+              "delta": 5.346,
+              "reason": "Lectura inversa de ventaja de sede."
+            },
+            {
+              "key": "absences",
+              "delta": 9.522,
+              "reason": "Impacto de bajas favorece al visitante."
+            },
+            {
+              "key": "suspensions",
+              "delta": 3.3,
+              "reason": "Suspensiones activas ajustan probabilidad de no perder."
+            }
+          ],
+          "scoreboard": {
+            "over_25": 55.52,
+            "under_25": 44.48,
+            "btts_yes": 41.0,
+            "btts_no": 59.0,
+            "double_chance_home": 35.0,
+            "double_chance_away": 70.17
+          }
+        },
+        "lineup_adjustment": {
+          "lineups_confirmed": true,
+          "changed_vs_pre_match": false,
+          "previous_selection": null,
+          "why_changed": []
+        },
+        "meta": {
+          "locked_prediction": true,
+          "weights_in_use": {
+            "form_recent": 1.0,
+            "h2h": 0.95,
+            "venue_split": 1.08,
+            "goal_trend": 1.0,
+            "btts_trend": 1.0,
+            "absences": 1.15,
+            "suspensions": 1.1,
+            "live_xg": 0.9,
+            "shots_on_target": 0.95
+          }
+        }
+      },
+      "lineup_confirmed": {
+        "status": "success",
+        "stage": "lineup_confirmed",
+        "generated_at": "2026-04-17T20:07:58.022674+00:00",
+        "event": {
+          "id": 13980103,
+          "home_team": {
+            "id": 2793,
+            "name": "Sassuolo",
+            "short_name": "Sassuolo",
+            "logo": "https://api.sofascore.app/api/v1/team/2793/image",
+            "score": 2
+          },
+          "away_team": {
+            "id": 2704,
+            "name": "Como",
+            "short_name": "Como",
+            "logo": "https://api.sofascore.app/api/v1/team/2704/image",
+            "score": 1
+          },
+          "tournament": "Serie A",
+          "category": "Italy",
+          "round": null,
+          "kickoff_utc": "2026-04-17T16:30:00+00:00",
+          "status": "Ended",
+          "status_type": "finished"
+        },
+        "recent_form": {
+          "home_last10": {
+            "sample_size": 10,
+            "wins": 4,
+            "draws": 2,
+            "losses": 4,
+            "win_rate": 40.0,
+            "goals_for_avg": 1.2,
+            "goals_against_avg": 1.2,
+            "btts_rate": 40.0,
+            "over25_rate": 60.0
+          },
+          "away_last10": {
+            "sample_size": 10,
+            "wins": 6,
+            "draws": 2,
+            "losses": 2,
+            "win_rate": 60.0,
+            "goals_for_avg": 1.7,
+            "goals_against_avg": 0.7,
+            "btts_rate": 20.0,
+            "over25_rate": 50.0
+          }
+        },
+        "h2h_analysis": {
+          "summary": {
+            "sample_size": 2,
+            "wins": 0,
+            "draws": 0,
+            "losses": 2,
+            "win_rate": 0.0,
+            "goals_for_avg": 0.0,
+            "goals_against_avg": 2.5,
+            "btts_rate": 0.0,
+            "over25_rate": 50.0
+          },
+          "sample_size": 2
+        },
+        "home_vs_away_behavior": {
+          "home_team_at_home": {
+            "sample_size": 4,
+            "wins": 1,
+            "draws": 1,
+            "losses": 2,
+            "win_rate": 25.0,
+            "goals_for_avg": 1.5,
+            "goals_against_avg": 1.5,
+            "btts_rate": 75.0,
+            "over25_rate": 75.0
+          },
+          "away_team_away": {
+            "sample_size": 6,
+            "wins": 3,
+            "draws": 1,
+            "losses": 2,
+            "win_rate": 50.0,
+            "goals_for_avg": 1.83,
+            "goals_against_avg": 1.0,
+            "btts_rate": 16.7,
+            "over25_rate": 66.7
+          }
+        },
+        "absences_and_sanctions": {
+          "home": {
+            "total": 7,
+            "injured": 2,
+            "suspended": 2,
+            "doubtful": 3,
+            "impact_score": 6.05
+          },
+          "away": {
+            "total": 2,
+            "injured": 1,
+            "suspended": 0,
+            "doubtful": 1,
+            "impact_score": 1.45
+          },
+          "impact_note": "El local llega mas condicionado por bajas/sanciones."
+        },
+        "psychological_context": {
+          "what_is_at_stake": "Lectura contextual basada en torneo/ronda. Para tabla exacta o objetivos europeos/descenso, se recomienda complementar con standings en tiempo real.",
+          "motivation_level": "media",
+          "lineup_expectation": "titulares confirmados",
+          "home_mood": "momento mixto",
+          "away_mood": "racha positiva"
+        },
+        "scenarios": [
+          {
+            "id": "A",
+            "name": "Titulares y motivacion maxima",
+            "projected_pick": "X2",
+            "confidence_pct": 94.7,
+            "note": "Con titulares y contexto competitivo alto, se mantiene el pick principal."
+          },
+          {
+            "id": "B",
+            "name": "Rotaciones parciales",
+            "projected_pick": "X2",
+            "confidence_pct": 84.7,
+            "note": "Con rotaciones el modelo reduce riesgo y prioriza doble oportunidad."
+          },
+          {
+            "id": "C",
+            "name": "Bajas importantes activas",
+            "projected_pick": "X2",
+            "confidence_pct": 87.7,
+            "note": "Las ausencias de mayor impacto redirigen el sesgo del pick."
+          },
+          {
+            "id": "D",
+            "name": "Factores externos (viaje, clima, doble competencia)",
+            "projected_pick": "Under 2.5",
+            "confidence_pct": 82.7,
+            "note": "Si aparecen condicionantes externos fuertes, se recomienda sesgo conservador."
+          }
+        ],
+        "prediction": {
+          "market": "double_chance",
+          "selection": "X2",
+          "confidence_pct": 91.65,
+          "stake": {
+            "value": 10,
+            "label": "10",
+            "all_in": null,
+            "justification": "Confianza 91.7%, margen entre mercados 11.2 y estado de alineaciones confirmadas."
+          },
+          "bookmaker_odds": null,
+          "implied_probability_pct": null,
+          "reasoning": [
+            "Lectura inversa de ventaja de sede.",
+            "Impacto de bajas favorece al visitante.",
+            "Suspensiones activas ajustan probabilidad de no perder."
+          ],
+          "drivers": [
+            {
+              "key": "venue_split",
+              "delta": 5.346,
+              "reason": "Lectura inversa de ventaja de sede."
+            },
+            {
+              "key": "absences",
+              "delta": 9.522,
+              "reason": "Impacto de bajas favorece al visitante."
+            },
+            {
+              "key": "suspensions",
+              "delta": 3.3,
+              "reason": "Suspensiones activas ajustan probabilidad de no perder."
+            }
+          ],
+          "scoreboard": {
+            "over_25": 55.52,
+            "under_25": 44.48,
+            "btts_yes": 41.0,
+            "btts_no": 59.0,
+            "double_chance_home": 35.0,
+            "double_chance_away": 70.17
+          }
+        },
+        "lineup_adjustment": {
+          "lineups_confirmed": true,
+          "changed_vs_pre_match": false,
+          "previous_selection": "X2",
+          "why_changed": []
+        },
+        "meta": {
+          "locked_prediction": false,
+          "weights_in_use": {
+            "form_recent": 1.0,
+            "h2h": 0.95,
+            "venue_split": 1.08,
+            "goal_trend": 1.0,
+            "btts_trend": 1.0,
+            "absences": 1.15,
+            "suspensions": 1.1,
+            "live_xg": 0.9,
+            "shots_on_target": 0.95
+          }
+        }
+      },
+      "post_match": {
+        "status": "success",
+        "generated_at": "2026-04-17T20:09:33.433882+00:00",
+        "actual": {
+          "finished": true,
+          "status_type": "finished",
+          "home_score": 2,
+          "away_score": 1,
+          "total_goals": 3
+        },
+        "evaluations": {
+          "pre_match": {
+            "selection": "X2",
+            "is_hit": false,
+            "scoreline": "2-1"
+          },
+          "lineup_confirmed": {
+            "selection": "X2",
+            "is_hit": false,
+            "scoreline": "2-1"
+          }
+        },
+        "evaluated_prediction": "lineup_confirmed",
+        "learning": {
+          "was_hit": false,
+          "weight_changes": {
+            "venue_split": -0.05,
+            "absences": -0.05,
+            "suspensions": -0.05
+          },
+          "updated_weights": {
+            "form_recent": 1.0,
+            "h2h": 0.95,
+            "venue_split": 1.03,
+            "goal_trend": 1.0,
+            "btts_trend": 1.0,
+            "absences": 1.1,
+            "suspensions": 1.05,
+            "live_xg": 0.9,
+            "shots_on_target": 0.95
+          },
+          "learning_note": "Variables penalizadas por fallo para recalibrar el modelo."
+        }
+      }
+    },
+    "12450935": {
+      "meta": {
+        "last_analysis_stage": "pre_match",
+        "last_analysis_at": "2026-04-17T22:04:30.433504+00:00"
+      },
+      "signals": {}
+    }
+  },
+  "patterns": {
+    "venue_split": {
+      "hits": 0,
+      "fails": 1,
+      "last_event_id": 13980103,
+      "updated_at": "2026-04-17T20:09:33.433870+00:00"
+    },
+    "absences": {
+      "hits": 0,
+      "fails": 1,
+      "last_event_id": 13980103,
+      "updated_at": "2026-04-17T20:09:33.433875+00:00"
+    },
+    "suspensions": {
+      "hits": 0,
+      "fails": 1,
+      "last_event_id": 13980103,
+      "updated_at": "2026-04-17T20:09:33.433878+00:00"
+    }
+  }
+}

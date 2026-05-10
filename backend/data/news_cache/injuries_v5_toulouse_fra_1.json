@@ -1,0 +1,48 @@
+{
+  "cached_at": "2026-04-17T16:55:09.615394",
+  "data": [
+    {
+      "player": "Mark McKenzie",
+      "position": "D",
+      "injury_type": "Suspension por roja",
+      "status": "Suspendido",
+      "details": "red_card_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Álex Domínguez",
+      "position": "Goalkeeper",
+      "injury_type": "Injury to the ankle",
+      "status": "Baja",
+      "details": "Injury to the ankle | Desde 04/02/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Rafik Messali",
+      "position": "M",
+      "injury_type": "Ankle Injury",
+      "status": "Baja",
+      "details": "Ankle Injury",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "Frank Magri",
+      "position": "F",
+      "injury_type": "Knee Injury",
+      "status": "Baja",
+      "details": "Knee Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Abu Francis",
+      "position": "Central Midfield",
+      "injury_type": "Tibia and fibula fracture",
+      "status": "Baja",
+      "details": "Tibia and fibula fracture | Desde 15/11/2025",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

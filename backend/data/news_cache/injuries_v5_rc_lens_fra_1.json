@@ -1,0 +1,32 @@
+{
+  "cached_at": "2026-04-17T18:04:30.152771",
+  "data": [
+    {
+      "player": "Régis Gurtner",
+      "position": "Goalkeeper",
+      "injury_type": "Hamstring injury",
+      "status": "Baja",
+      "details": "Hamstring injury | Desde 14/01/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Kyllian Antonio",
+      "position": "Centre-Back",
+      "injury_type": "Foot injury",
+      "status": "Baja",
+      "details": "Foot injury | Desde 08/02/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Jonathan Gradit",
+      "position": "Centre-Back",
+      "injury_type": "Lower leg fracture",
+      "status": "Baja",
+      "details": "Lower leg fracture | Desde 28/11/2025",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

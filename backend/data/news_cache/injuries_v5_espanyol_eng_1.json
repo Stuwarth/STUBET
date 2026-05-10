@@ -1,0 +1,21 @@
+{
+  "cached_at": "2026-05-03T12:44:59.953577",
+  "data": [
+    {
+      "player": "Pol Lozano",
+      "position": "M",
+      "injury_type": "Suspension por roja",
+      "status": "Suspendido",
+      "details": "yellow_or_red_card_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Cyril Ngonge",
+      "position": "F",
+      "injury_type": "Knock Injury",
+      "status": "Duda",
+      "details": "Knock Injury",
+      "source": "sofascore"
+    }
+  ]
+}

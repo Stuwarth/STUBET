@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 STUBET — Machine Learning Betting Intelligence</title>
+    <meta name="description" content="Sistema de predicción deportiva con Machine Learning. Detección de value bets, análisis estadístico, patrones y tracking de rendimiento en tiempo real.">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css?v=20260429">
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="/static/images/stubet_logo.png" alt="STUBET Logo" style="width: 42px; border-radius: 50%; box-shadow: 0 0 10px rgba(0, 150, 255, 0.5);">
+                <div class="logo-text">
+                    <span class="logo-title">STUBET</span>
+                    <span class="logo-subtitle">Intelligence v2.0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#" class="nav-link active" data-section="dashboard" id="nav-dashboard">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Dashboard</span>
+            </a>
+            <a href="#" class="nav-link" data-section="live" id="nav-live">
+                <span class="nav-icon">🔴</span>
+                <span class="nav-text">En Vivo</span>
+                <span class="nav-badge live-pulse">LIVE</span>
+            </a>
+            <a href="#" class="nav-link" data-section="predictions" id="nav-predictions">
+                <span class="nav-icon">🎯</span>
+                <span class="nav-text">Predicciones</span>
+            </a>
+            <a href="#" class="nav-link" data-section="valuebets" id="nav-valuebets">
+                <span class="nav-icon">💎</span>
+                <span class="nav-text">Value Bets</span>
+                <span class="nav-badge" id="value-badge">0</span>
+            </a>
+            <a href="#" class="nav-link" data-section="patterns" id="nav-patterns">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-text">Patrones</span>
+            </a>
+            <a href="#" class="nav-link" data-section="news" id="nav-news">
+                <span class="nav-icon">📰</span>
+                <span class="nav-text">Noticias</span>
+            </a>
+            <a href="#" class="nav-link" data-section="performance" id="nav-performance">
+                <span class="nav-icon">💰</span>
+                <span class="nav-text">Rend. & Bankroll</span>
+            </a>
+            <a href="#" class="nav-link" data-section="models" id="nav-models">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-text">Modelos ML</span>
+            </a>
+            <a href="#" class="nav-link" data-section="settings" id="nav-settings">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Configuración</span>
+            </a>
+        </div>
+        
+        <div class="sidebar-footer">
+            <div class="ai-status">
+                <div class="status-dot pulse"></div>
+                <span>AI Engine Active</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menu-toggle">☰</button>
+                <h1 class="page-title" id="page-title">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="stat-card glass-card">
+                    <div class="stat-header">
+                        <span class="stat-label">🟢 LasPlatas</span>
+                    </div>
+                    <div id="header-bankroll-lp" class="stat-value">Bs 0</div>
+                    <div id="header-profit-lp" style="font-size: 0.75rem; font-weight: 600; opacity: 0.9;">Bs +0</div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-header">
+                        <span class="stat-label">🟡 MetaBet</span>
+                    </div>
+                    <div id="header-bankroll-mb" class="stat-value">Bs 0</div>
+                    <div id="header-profit-mb" style="font-size: 0.75rem; font-weight: 600; opacity: 0.9;">Bs +0</div>
+                </div>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <span class="stat-label">Accuracy</span>
+                        <span class="stat-value accent" id="header-accuracy">—</span>
+                    </div>
+                    <div class="header-stat">
+                        <span class="stat-label">ROI</span>
+                        <span class="stat-value" id="header-roi">—</span>
+                    </div>
+                </div>
+                <div class="header-filter-group" style="display:flex; gap:0.5rem; align-items:center;">
+                    <span>📅</span>
+                    <input type="date" id="global-date-filter" class="input-date" onchange="refreshData()">
+                </div>
+                <button class="btn btn-primary btn-glow" id="btn-refresh" onclick="refreshData()">
+                    <span>🔄</span> Actualizar
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section class="content-section active" id="section-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #0ea5e9, #14b8a6);">🎯</div>
+                    <div class="stat-card-content">
+                        <span class="stat-card-label">Total Predicciones</span>
+                        <span class="stat-card-value count-up" id="stat-total">0</span>
+                    </div>
+                    <div class="stat-card-trend up"><span>↑</span> <span id="stat-total-trend">+12 hoy</span></div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅</div>
+                    <div class="stat-card-content">
+                        <span class="stat-card-label">Precisión Global</span>
+                        <span class="stat-card-value count-up" id="stat-accuracy">0%</span>
+                    </div>
+                    <div class="stat-card-trend" id="accuracy-trend"><span>—</span></div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">💰</div>
+                    <div class="stat-card-content">
+                        <span class="stat-card-label">ROI</span>
+                        <span class="stat-card-value count-up" id="stat-roi">0%</span>
+                    </div>
+                    <div class="stat-card-trend" id="roi-trend"><span>—</span></div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">💎</div>
+                    <div class="stat-card-content">
+                        <span class="stat-card-label">Value Bets</span>
+                        <span class="stat-card-value count-up" id="stat-valuebets">0</span>
+                    </div>
+                    <div class="stat-card-trend up" id="vb-trend"><span>🔥</span> <span>Activos</span></div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3>📊 Rendimiento por Mercado</h3>
+                        <div class="chart-filter">
+                            <select id="market-filter" class="input-select">
+                                <option value="all">Todos</option>
+                                <option value="match_result">1X2</option>
+                                <option value="over_under_25">Over/Under</option>
+                                <option value="btts">BTTS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="market-chart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card glass-card">
+                    <div class="chart-header">
+                        <h3>📈 Precisión Diaria (30 días)</h3>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="daily-chart" width="600" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-card glass-card">
+                <div class="table-header">
+                    <h3>🎯 Predicciones Recientes</h3>
+                    <div class="table-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="loadPredictions()">Ver Todas</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="recent-predictions-table">
+                        <thead>
+                            <tr><th>Fecha</th><th>Partido</th><th>Liga</th><th>Mercado</th><th>Predicción</th><th>Confianza</th><th>Value Bet</th><th>Resultado</th></tr>
+                        </thead>
+                        <tbody id="recent-predictions-body"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- LIVE SECTION (NEW) -->
+        <section class="content-section" id="section-live">
+            <div class="section-intro">
+                <h2>🔴 Partidos En Vivo & Programados</h2>
+                <p>Datos en tiempo real multideporte — Fútbol, NBA y Tennis</p>
+            </div>
+
+            <!-- Sport Tabs -->
+            <div class="sport-tabs glass-card" style="display:flex; gap:0.5rem; padding:0.75rem 1.5rem; margin-bottom:1rem;">
+                <button class="btn btn-primary sport-tab active" data-sport="soccer" onclick="switchSport('soccer')" id="tab-soccer">⚽ Fútbol</button>
+                <button class="btn btn-secondary sport-tab" data-sport="nba" onclick="switchSport('nba')" id="tab-nba">🏀 NBA</button>
+                <button class="btn btn-secondary sport-tab" data-sport="atp" onclick="switchSport('atp')" id="tab-atp">🎾 Tennis ATP</button>
+                <button class="btn btn-secondary sport-tab" data-sport="wta" onclick="switchSport('wta')" id="tab-wta">🎾 Tennis WTA</button>
+            </div>
+
+            <div class="filters-bar glass-card" id="soccer-filters">
+                <div class="filter-group">
+                    <label>Liga Principal:</label>
+                    <select id="live-league-filter" class="input-select" onchange="handleFilterChange()">
+                        <option value="sofascore_all">🌍 Todo el Mundo (Sofascore)</option>
+                        <option value="eng.1">🏴 Premier League</option>
+                        <option value="esp.1">🇪🇸 La Liga</option>
+                        <option value="ita.1">🇮🇹 Serie A</option>
+                        <option value="ger.1">🇩🇪 Bundesliga</option>
+                        <option value="fra.1">🇫🇷 Ligue 1</option>
+                        <option value="uefa.champions">🏆 Champions League</option>
+                        <option value="uefa.europa">🥈 Europa League</option>
+                        <option value="arg.1">🇦🇷 Liga Argentina</option>
+                        <option value="bra.1">🇧🇷 Brasileirão</option>
+                        <option value="mex.1">🇲🇽 Liga MX</option>
+                        <option value="col.1">🇨🇴 Liga Colombiana</option>
+                        <option value="usa.1">🇺🇸 MLS</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>📅 Fecha:</label>
+                    <div class="date-nav">
+                        <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(-1)" title="Día anterior">◀</button>
+                        <input type="date" id="live-date-filter" class="input-field date-input" onchange="handleFilterChange()">
+                        <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(1)" title="Día siguiente">▶</button>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-accent" onclick="setScoreboardToday()" title="Ir a hoy">📅 Hoy</button>
+                <button class="btn btn-primary" onclick="handleFilterChange()">🔄 Actualizar</button>
+                <div class="filter-group" style="margin-left:auto;">
+                    <span class="live-indicator"><span class="status-dot pulse"></span> <span id="source-indicator">Datos de ESPN/Sofascore</span></span>
+                </div>
+            </div>
+
+            <!-- Dynamic Sub-Filter for Sofascore Leagues -->
+            <div id="sofascore-subfilter-container" class="filters-bar glass-card" style="display: none; margin-top: -1rem; margin-bottom: 1.5rem; padding: 0.5rem 1.5rem; justify-content: flex-start; overflow-x: auto; white-space: nowrap;">
+                <label style="margin-right: 1rem; color: var(--text-secondary); font-size: 0.85rem;">Filtrar Torneo:</label>
+                <select id="sofascore-league-select" class="input-select" style="max-width: 300px;" onchange="renderLiveMatchesFromState()">
+                    <option value="ALL">🗓️ Mostrar Todos</option>
+                </select>
+                <span style="margin-left: 1rem; font-size: 0.8rem; color: var(--text-secondary);" id="sofascore-match-count">0 partidos</span>
+            </div>
+
+            <div class="live-matches-grid" id="live-matches-grid">
+                <div class="empty-state glass-card">
+                    <span style="font-size:3rem;">⚽</span>
+                    <p>Selecciona una liga y haz clic en Actualizar</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Predictions Section -->
+        <section class="content-section" id="section-predictions">
+            <div class="section-intro">
+                <h2>🎯 Predicciones de la IA</h2>
+                <p>Predicciones generadas por el motor ML para próximos partidos</p>
+            </div>
+            <div class="filters-bar glass-card">
+                <div class="filter-group">
+                    <label>Liga:</label>
+                    <select id="pred-league-filter" class="input-select"><option value="">Todas</option></select>
+                </div>
+                <div class="filter-group">
+                    <label>Mercado:</label>
+                    <select id="pred-market-filter" class="input-select">
+                        <option value="">Todos</option>
+                        <option value="match_result">1X2</option>
+                        <option value="over_under_25">Over/Under 2.5</option>
+                        <option value="btts">BTTS</option>
+                        <option value="corners">Corners</option>
+                        <option value="cards">Tarjetas</option>
+                        <option value="shots">Remates</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Confianza:</label>
+                    <select id="pred-confidence-filter" class="input-select">
+                        <option value="">Todas</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="MEDIUM">Media</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="filterPredictions()">🔍 Filtrar</button>
+            </div>
+            <div class="predictions-grid" id="predictions-grid"></div>
+        </section>
+
+        <!-- Value Bets Section -->
+        <section class="content-section" id="section-valuebets">
+            <div class="section-intro">
+                <h2>💎 Value Bets Detectados</h2>
+                <p>Apuestas con edge positivo según el modelo ML vs cuotas del bookmaker</p>
+            </div>
+            <div class="value-bets-actions glass-card" style="margin-bottom:1.5rem; padding:1rem; display:flex; gap:1rem; align-items:center;">
+                <button class="btn btn-primary" onclick="sendValueBetsTelegram()">📲 Enviar por Telegram</button>
+                <span class="telegram-status" id="telegram-status-vb">Estado: —</span>
+            </div>
+            <div class="value-bets-list" id="value-bets-list"></div>
+        </section>
+
+        <!-- PATTERNS SECTION (NEW) -->
+        <section class="content-section" id="section-patterns">
+            <div class="section-intro">
+                <h2>🔍 Detector de Patrones</h2>
+                <p>El motor IA analiza datos históricos para encontrar patrones estadísticos recurrentes con alta probabilidad de acierto</p>
+            </div>
+
+            <div class="pattern-actions glass-card" style="margin-bottom:1.5rem; padding:1rem; display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                <button class="btn btn-primary btn-lg" onclick="discoverPatterns()">🔍 Descubrir Patrones</button>
+                <span style="opacity:0.7;">Analiza toda la base de datos y encuentra patrones con >55% hit rate</span>
+            </div>
+
+            <div class="patterns-grid" id="patterns-grid">
+                <div class="empty-state glass-card">
+                    <span style="font-size:3rem;">🔍</span>
+                    <p>Haz clic en "Descubrir Patrones" para analizar los datos históricos</p>
+                    <p style="opacity:0.6; font-size:0.85rem;">El sistema buscará rachas, tendencias H2H, correlaciones estadísticas, y más</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- NEWS/INJURIES SECTION (NEW) -->
+        <section class="content-section" id="section-news">
+            <div class="section-intro">
+                <h2>📰 Noticias & Lesiones</h2>
+                <p>Noticias reales de ESPN y datos de lesiones — información clave para estar un paso adelante</p>
+            </div>
+
+            <div class="filters-bar glass-card">
+                <div class="filter-group">
+                    <label>Fuente:</label>
+                    <select id="news-sport-filter" class="input-select" onchange="onNewsSportChange()">
+                        <option value="soccer">⚽ Fútbol</option>
+                        <option value="nba">🏀 NBA</option>
+                        <option value="atp">🎾 Tennis ATP</option>
+                        <option value="wta">🎾 Tennis WTA</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="news-league-group">
+                    <label>Liga:</label>
+                    <select id="news-league-filter" class="input-select" onchange="loadNews()">
+                        <option value="eng.1">🏴 Premier League</option>
+                        <option value="esp.1">🇪🇸 La Liga</option>
+                        <option value="ita.1">🇮🇹 Serie A</option>
+                        <option value="ger.1">🇩🇪 Bundesliga</option>
+                        <option value="fra.1">🇫🇷 Ligue 1</option>
+                        <option value="uefa.champions">🏆 Champions League</option>
+                        <option value="uefa.europa">🥈 Europa League</option>
+                        <option value="arg.1">🇦🇷 Liga Argentina</option>
+                        <option value="bra.1">🇧🇷 Brasileirão</option>
+                        <option value="mex.1">🇲🇽 Liga MX</option>
+                        <option value="col.1">🇨🇴 Liga Colombiana</option>
+                        <option value="usa.1">🇺🇸 MLS</option>
+                        <option value="conmebol.libertadores">🏆 Copa Libertadores</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="loadNews()">📰 Cargar Noticias</button>
+                <div class="filter-group">
+                    <label>Buscar lesiones:</label>
+                    <input type="text" id="injury-team-search" class="input-field" placeholder="Nombre del equipo..." style="width:200px;">
+                    <button class="btn btn-secondary" onclick="searchInjuries()">🏥 Buscar</button>
+                </div>
+            </div>
+
+            <div class="news-layout">
+                <div class="news-column">
+                    <h3 style="margin-bottom:1rem;">📰 Últimas Noticias</h3>
+                    <div id="news-list" class="news-list">
+                        <div class="empty-state glass-card"><p>Selecciona una liga para cargar noticias reales</p></div>
+                    </div>
+                </div>
+                <div class="news-column">
+                    <h3 style="margin-bottom:1rem;">🏥 Lesiones & Bajas</h3>
+                    <div id="injuries-list" class="injuries-list">
+                        <div class="empty-state glass-card"><p>Busca un equipo para ver lesiones actuales</p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Performance Section -->
+        <section class="content-section" id="section-performance">
+            <div class="section-intro">
+                <h2>📈 Rendimiento del Sistema</h2>
+                <p>Tracking detallado de la precisión y ROI del motor de predicción</p>
+            </div>
+            <div class="performance-cards">
+                <div class="perf-card glass-card"><h4>🏆 Racha Actual</h4><div class="perf-value" id="streak-display">—</div></div>
+                <div class="perf-card glass-card"><h4>💰 Profit/Loss</h4><div class="perf-value" id="profit-display">$0</div></div>
+                <div class="perf-card glass-card" style="border: 1px solid #10b981;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <h4>📊 LasPlatas</h4>
+                        <div id="lp-monthly-profit" style="font-size: 0.8rem; font-weight:700; color:#10b981;">+Bs 0</div>
+                    </div>
+                    <div class="perf-value" id="bankroll-lp" style="color:#10b981;">Por fijar</div>
+                    <div style="margin-top: 8px; display:flex; gap: 5px;">
+                        <input type="number" id="bankroll-input-lp" class="input-field" placeholder="Bs" style="padding: 4px; font-size: 12px; width: 60px;">
+                        <button class="btn btn-primary" onclick="setInitialBankroll('lasplatas')" style="padding: 4px 8px; font-size: 12px;">Fijar</button>
+                    </div>
+                </div>
+                <div class="perf-card glass-card" style="border: 1px solid #f59e0b;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <h4>🟡 Metabet</h4>
+                        <div id="mb-monthly-profit" style="font-size: 0.8rem; font-weight:700; color:#f59e0b;">+Bs 0</div>
+                    </div>
+                    <div class="perf-value" id="bankroll-mb" style="color:#f59e0b;">Por fijar</div>
+                    <div style="margin-top: 8px; display:flex; gap: 5px;">
+                        <input type="number" id="bankroll-input-mb" class="input-field" placeholder="Bs" style="padding: 4px; font-size: 12px; width: 60px;">
+                        <button class="btn btn-primary" onclick="setInitialBankroll('metabet')" style="padding: 4px 8px; font-size: 12px; background: #f59e0b;">Fijar</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-card glass-card" style="margin-top: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.3);">
+                <div class="chart-header">
+                    <h3>✍️ Registrar Pick (Manual o por Cupón/Link)</h3>
+                    <p style="font-size: 0.85rem; color: #94a3b8;">Agrega tus apuestas para llevar la contabilidad de cada casa de apuestas.</p>
+                </div>
+                
+                <!-- AUTO SCANNER DE CUPONES/LINKS -->
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 8px; margin-top: 1rem; border: 1px dashed #10b981;">
+                    <h4 style="margin: 0 0 10px 0; color: #10b981;">🤖 Escáner Automático</h4>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <select id="scanner-bookmaker" class="input-field" style="width: 130px; padding: 6px;">
+                            <option value="lasplatas">🟢 LasPlatas</option>
+                            <option value="metabet">🟡 Metabet</option>
+                        </select>
+                        <input type="text" id="ticket-id" class="input-field" placeholder="Código del cupón (ej: 8J2KF) o link de Metabet" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="scanTicket()">🔍 Rastrear</button>
+                    </div>
+                    <small style="color: #94a3b8; display: block; margin-top: 5px;">LasPlatas = pega el código | Metabet = pega el link compartido</small>
+                </div>
+
+                <div style="text-align: center; margin: 15px 0; color: #64748b; font-size: 0.9rem;">— o ingresa los datos manualmente —</div>
+
+                <!-- Bet Type Selector -->
+                <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center;">
+                    <select id="manual-bookmaker" class="input-field" style="padding: 6px; width: 130px;">
+                        <option value="lasplatas">🟢 LP</option>
+                        <option value="metabet">🟡 MB</option>
+                    </select>
+                    <div style="display: flex; gap: 4px; background: rgba(0,0,0,0.3); border-radius: 8px; padding: 3px;">
+                        <button class="btn btn-primary btn-sm" id="btn-type-single" onclick="setBetType('single')" style="padding: 5px 14px; font-size: 0.8rem;">⚡ Single</button>
+                        <button class="btn btn-secondary btn-sm" id="btn-type-combi" onclick="setBetType('combinada')" style="padding: 5px 14px; font-size: 0.8rem;">🔗 Combinada</button>
+                    </div>
+                    <div id="combi-odds-display" style="display: none; background: linear-gradient(135deg, #f59e0b22, #ef444422); padding: 6px 14px; border-radius: 8px; border: 1px solid #f59e0b55; font-size: 0.85rem;">
+                        Cuota combinada: <strong id="combi-odds-value" style="color: #f59e0b;">—</strong> | <span id="combi-legs-count">0 selecciones</span>
+                    </div>
+                </div>
+
+                <!-- Single Bet Row -->
+                <div id="single-bet-form">
+                    <div style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr 1.5fr auto; gap: 10px;">
+                        <input type="text" id="manual-match" class="input-field" placeholder="Partido (Ej: The Strongest vs Bolivar)">
+                        <input type="text" id="manual-market" class="input-field" placeholder="Mercado (Ej: +2.5 Goles)">
+                        <input type="number" step="0.01" id="manual-odds" class="input-field" placeholder="Cuota">
+                        <input type="number" id="manual-stake" class="input-field" placeholder="Inversión (Bs)">
+                        <input type="datetime-local" id="manual-placed-at" class="input-field" title="Fecha (Opcional)">
+                        <button class="btn btn-accent" onclick="addManualPick()">Guardar Pick</button>
+                    </div>
+                </div>
+
+                <!-- Combinada Bet Form -->
+                <div id="combi-bet-form" style="display: none;">
+                    <!-- Add Leg Row -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px;">
+                        <input type="text" id="combi-match" class="input-field" placeholder="Partido (Ej: Espanyol vs Real Madrid)">
+                        <input type="text" id="combi-market" class="input-field" placeholder="Mercado (Ej: +4.5 Tarjetas)">
+                        <input type="number" step="0.01" id="combi-leg-odds" class="input-field" placeholder="Cuota">
+                        <button class="btn btn-primary" onclick="addCombiLeg()" style="white-space: nowrap;">➕ Agregar</button>
+                    </div>
+                    <!-- Legs List -->
+                    <div id="combi-legs-list" style="margin-bottom: 10px;"></div>
+                    <!-- Stake + Save -->
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" id="combi-stake" class="input-field" placeholder="Inversión total (Bs)" style="width: 180px;">
+                        <button class="btn btn-accent" onclick="saveCombiPick()" style="white-space: nowrap;">💾 Guardar Combinada</button>
+                        <button class="btn btn-secondary btn-sm" onclick="clearCombiLegs()" style="white-space: nowrap;">🗑️ Limpiar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Summary Report -->
+            <div id="daily-report" class="glass-card" style="margin-top: 1.5rem; padding: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-size: 1rem; font-weight: 700;">📊 Reporte de Rendimiento</h3>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="daily-report-date" style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);"></span>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <!-- LasPlatas Section -->
+                    <div style="border-right: 1px solid var(--border-color); padding-right: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;">
+                            <span style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></span>
+                            <h4 style="font-size: 0.9rem; font-weight: 700; color: #10b981;">LAS PLATAS</h4>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Invertido</div>
+                                <div id="lp-daily-invested" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono);">Bs 0</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">W/L</div>
+                                <div id="lp-daily-wl" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">0-0</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Profit</div>
+                                <div id="lp-daily-net" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono);">Bs 0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metabet Section -->
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 1rem;">
+                            <span style="width: 12px; height: 12px; background: #f59e0b; border-radius: 3px;"></span>
+                            <h4 style="font-size: 0.9rem; font-weight: 700; color: #f59e0b;">METABET</h4>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Invertido</div>
+                                <div id="mb-daily-invested" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono);">Bs 0</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">W/L</div>
+                                <div id="mb-daily-wl" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono); color: var(--text-primary);">0-0</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;">Profit</div>
+                                <div id="mb-daily-net" style="font-size: 1.1rem; font-weight: 800; font-family: var(--font-mono);">Bs 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="daily-pending-note" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--warning); display: none;">
+                    ⏳ Tienes <span id="daily-pending-count">0</span> apuesta(s) pendiente(s) por resolver en total.
+                </div>
+            </div>
+            
+            <div class="table-card glass-card" style="margin-top: 1.5rem;">
+                <div class="table-header" style="flex-wrap: wrap; gap: 10px;">
+                    <h3>📋 Historial de Picks</h3>
+                    <div class="filter-group">
+                        <label>Filtrar por Día:</label>
+                        <input type="date" id="filter-pick-date" class="input-field" onchange="loadBankrollData()">
+                        <button class="btn btn-secondary btn-sm" onclick="resetPickFilter()">Reset</button>
+                        <button class="btn btn-primary btn-sm" onclick="autoResolvePicks()" style="margin-left: 10px;">🤖 Auto-Resolver</button>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Fecha</th><th>Casa</th><th>Partido</th><th>Mercado</th><th>Cuota</th><th>Stake</th><th>Resultado</th><th>Acción</th></tr>
+                        </thead>
+                        <tbody id="manual-picks-body">
+                            <tr><td colspan="8" style="text-align: center; color: #64748b;">No has registrado apuestas manuales aún.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-card glass-card" style="margin-top: 1.5rem;">
+                <div class="chart-header"><h3>📊 Rendimiento por Mercado</h3></div>
+                <div class="market-breakdown" id="market-breakdown"></div>
+            </div>
+        </section>
+
+        <!-- Models Section -->
+        <section class="content-section" id="section-models">
+            <div class="section-intro">
+                <h2>🧠 Modelos de Machine Learning</h2>
+                <p>Estado y rendimiento de los modelos de predicción</p>
+            </div>
+            <div class="models-grid" id="models-grid"></div>
+            <div class="actions-card glass-card" style="margin-top: 1.5rem;">
+                <h3>⚡ Acciones</h3>
+                <div class="action-buttons">
+                    <button class="btn btn-accent btn-lg" onclick="runPipeline()" id="btn-pipeline">🚀 Ejecutar Pipeline (API-Football)</button>
+                    <button class="btn btn-primary btn-lg" onclick="startLiveScraper()">📡 Iniciar Scraper Live</button>
+                    <button class="btn btn-secondary btn-lg" onclick="stopLiveScraper()">🛑 Detener Scraper Live</button>
+                    <button class="btn btn-primary btn-lg" onclick="trainModels()">🧠 Entrenar Modelos</button>
+                    <button class="btn btn-secondary btn-lg" onclick="collectData()">📥 Recopilar Datos Liga</button>
+                    <button class="btn btn-secondary btn-lg" onclick="settleResults()">✅ Liquidar Resultados</button>
+                    
+                    <button class="btn btn-secondary btn-lg" onclick="discoverPatterns()">🔍 Descubrir Patrones</button>
+                </div>
+                <div style="margin-top:0.8rem; color:#94a3b8; font-size:0.9rem;">
+                    Estado scraper: <span id="scraper-status">cargando...</span>
+                </div>
+                <div id="pipeline-output" style="margin-top:1rem; display:none;">
+                    <pre style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; font-size:0.8rem; max-height:300px; overflow-y:auto; color:#a5f3fc; font-family:'JetBrains Mono',monospace;" id="pipeline-log"></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="content-section" id="section-settings">
+            <div class="section-intro">
+                <h2>⚙️ Configuración</h2>
+                <p>Ajustes del sistema de predicción y notificaciones — todo se guarda desde aquí</p>
+            </div>
+
+            <div class="settings-card glass-card">
+                <h3>🔑 API Keys</h3>
+                <div class="setting-row">
+                    <label>Football API Key (API-Sports):</label>
+                    <input type="text" class="input-field" placeholder="Tu API key de api-football.com" id="setting-football-key">
+                    <small>Obtener en <a href="https://www.api-football.com/" target="_blank">api-football.com</a> (Plan gratuito: 100 req/día) <span id="status-football-key" style="color:#10b981;"></span></small>
+                </div>
+                <div class="setting-row">
+                    <label>The Odds API Key:</label>
+                    <input type="text" class="input-field" placeholder="Tu API key de the-odds-api.com" id="setting-odds-key">
+                    <small>Obtener en <a href="https://the-odds-api.com/" target="_blank">the-odds-api.com</a> (Plan gratuito: 500 req/mes) <span id="status-odds-key" style="color:#10b981;"></span></small>
+                </div>
+                <div class="setting-row">
+                    <label>Football-Data.org Key:</label>
+                    <input type="text" class="input-field" placeholder="Tu API key de football-data.org" id="setting-footballdata-key">
+                    <small>Obtener en <a href="https://www.football-data.org/" target="_blank">football-data.org</a> (Gratis: 10 req/min) <span id="status-footballdata-key" style="color:#10b981;"></span></small>
+                </div>
+            </div>
+
+            <div class="settings-card glass-card">
+                <h3>📲 Telegram Notifications</h3>
+                <div class="setting-row">
+                    <label>Bot Token:</label>
+                    <input type="text" class="input-field" placeholder="Token del bot de @BotFather" id="setting-telegram-token">
+                    <small>Crear bot: Telegram → @BotFather → /newbot <span id="status-telegram-token" style="color:#10b981;"></span></small>
+                </div>
+                <div class="setting-row">
+                    <label>Chat ID:</label>
+                    <input type="text" class="input-field" placeholder="Tu Chat ID de @userinfobot" id="setting-telegram-chat">
+                    <small>Obtener: Telegram → @userinfobot → /start</small>
+                </div>
+                <div class="setting-row" style="display:flex; gap:1rem; align-items: center;">
+                    <button class="btn btn-primary" onclick="testTelegram()">📲 Probar Conexión</button>
+                    <button class="btn btn-secondary" onclick="sendDailyReport()">📊 Enviar Reporte</button>
+                    <span id="telegram-status" style="opacity:0.7;">Estado: —</span>
+                </div>
+            </div>
+
+            <div class="settings-card glass-card">
+                <h3>🎛️ Parámetros ML</h3>
+                <div class="setting-row">
+                    <label>Umbral de Confianza Mínimo:</label>
+                    <input type="range" min="40" max="80" value="55" class="input-range" id="setting-confidence">
+                    <span id="confidence-value">55%</span>
+                </div>
+                <div class="setting-row">
+                    <label>Value Bet Mínimo (Edge %):</label>
+                    <input type="range" min="1" max="25" value="5" class="input-range" id="setting-value-edge">
+                    <span id="edge-value">5%</span>
+                </div>
+                <div class="setting-row">
+                    <label>Fracción Kelly:</label>
+                    <input type="range" min="10" max="100" value="25" class="input-range" id="setting-kelly">
+                    <span id="kelly-value">25%</span>
+                </div>
+            </div>
+
+            <div class="settings-card glass-card" style="display:flex; gap:1rem; flex-wrap:wrap; align-items:center;">
+                <button class="btn btn-accent btn-lg" onclick="saveAllSettings()" id="btn-save-settings">💾 Guardar Configuración</button>
+                <button class="btn btn-primary btn-lg" onclick="runPipeline()">🚀 Ejecutar Pipeline Ahora</button>
+                <span id="save-status" style="opacity:0.7;"></span>
+            </div>
+
+            <div class="settings-card glass-card">
+                <h3>📊 Base de Datos</h3>
+                <div class="db-stats" id="db-stats"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>Procesando datos con IA...</p>
+        </div>
+    </div>
+
+    <!-- Modal para Editar Pick -->
+    <div id="edit-pick-modal" class="modal-overlay">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 class="modal-title">✏️ Editar Apuesta</h3>
+                <button class="close-modal" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-form">
+                <input type="hidden" id="edit-pick-id">
+                <div class="form-group">
+                    <label>Partido</label>
+                    <input type="text" id="edit-match" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>Mercado</label>
+                    <input type="text" id="edit-market" class="input-field">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="form-group">
+                        <label>Cuota</label>
+                        <input type="number" step="0.001" id="edit-odds" class="input-field">
+                    </div>
+                    <div class="form-group">
+                        <label>Inversión (Bs)</label>
+                        <input type="number" id="edit-stake" class="input-field">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Fecha y Hora</label>
+                    <input type="datetime-local" id="edit-placed-at" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label>Casa de Apuestas</label>
+                    <select id="edit-bookmaker" class="input-select">
+                        <option value="lasplatas">LasPlatas</option>
+                        <option value="metabet">Metabet</option>
+                    </select>
+                </div>
+                <div style="margin-top: 10px; display: flex; gap: 10px;">
+                    <button class="btn btn-primary" style="flex: 1;" onclick="submitUpdatePick()">Actualizar Datos</button>
+                    <button class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/app.js?v=20260505_v5"></script>
+</body>
+</html>

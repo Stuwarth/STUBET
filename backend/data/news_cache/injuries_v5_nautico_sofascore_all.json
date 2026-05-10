@@ -1,0 +1,32 @@
+{
+  "cached_at": "2026-04-27T19:54:18.946078",
+  "data": [
+    {
+      "player": "Luiz Paulo",
+      "position": "Left-Back",
+      "injury_type": "Cruciate ligament tear",
+      "status": "Baja",
+      "details": "Cruciate ligament tear | Desde 11/05/2025",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Júnior Todinho",
+      "position": "Centre-Forward",
+      "injury_type": "Knee injury",
+      "status": "Baja",
+      "details": "Knee injury | Desde 16/03/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Alemão",
+      "position": "Centre-Back",
+      "injury_type": "Cruciate ligament tear",
+      "status": "Baja",
+      "details": "Cruciate ligament tear | Desde 04/02/2025",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

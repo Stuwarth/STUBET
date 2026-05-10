@@ -1,0 +1,56 @@
+{
+  "cached_at": "2026-04-15T11:36:34.116065",
+  "data": [
+    {
+      "player": "Pau Cubarsí",
+      "position": "D",
+      "injury_type": "Suspensión",
+      "status": "Suspendido",
+      "details": "Red card suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Raphinha",
+      "position": "M",
+      "injury_type": "Hamstring Injury",
+      "status": "Baja",
+      "details": "Hamstring Injury",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "Jofre Torrents",
+      "position": "D",
+      "injury_type": "Calf Injury",
+      "status": "Baja",
+      "details": "Calf Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Andreas Christensen",
+      "position": "Centre-Back",
+      "injury_type": "Ligament tear",
+      "status": "Baja",
+      "details": "Ligament tear | Desde 21/12/2025 | Vuelve 30/04/2026",
+      "return_date": "30/04/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Toni Fernández",
+      "position": "M",
+      "injury_type": "Ankle Injury",
+      "status": "Duda",
+      "details": "Ankle Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Marc Bernal",
+      "position": "M/D",
+      "injury_type": "Ankle",
+      "status": "Duda",
+      "details": "Ankle",
+      "return_date": "<i>Subscribers Only</i>",
+      "source": "rotowire"
+    }
+  ]
+}

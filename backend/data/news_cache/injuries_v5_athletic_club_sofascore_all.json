@@ -1,0 +1,38 @@
+{
+  "cached_at": "2026-04-27T19:54:07.227390",
+  "data": [
+    {
+      "player": "Mikel Jauregizar",
+      "position": "M",
+      "injury_type": "Suspension por roja",
+      "status": "Suspendido",
+      "details": "yellow_or_red_card_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Beñat Prados",
+      "position": "Central Midfield",
+      "injury_type": "Cruciate ligament tear",
+      "status": "Baja",
+      "details": "Cruciate ligament tear | Desde 13/09/2025 | Vuelve 31/05/2026",
+      "return_date": "31/05/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Íñigo Lekue",
+      "position": "D",
+      "injury_type": "Physical Discomfort",
+      "status": "Duda",
+      "details": "Physical Discomfort",
+      "source": "sofascore"
+    },
+    {
+      "player": "Maroan Sannadi",
+      "position": "F",
+      "injury_type": "Physical Discomfort",
+      "status": "Duda",
+      "details": "Physical Discomfort",
+      "source": "sofascore"
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+[
+  {
+    "name": "Hot Streak Continuation",
+    "description": "Equipos con 4+ victorias seguidas tienden a seguir ganando",
+    "category": "form",
+    "confidence": 0.632,
+    "sample_size": 19,
+    "hit_rate": 0.632,
+    "conditions": {
+      "consecutive_wins": 4
+    },
+    "prediction": {
+      "expected": "Win",
+      "market": "match_result"
+    },
+    "discovered_at": "2026-04-27T17:16:20.760363",
+    "last_validated": "2026-04-27T17:16:20.760363",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "Home Fortress",
+    "description": "Equipos invictos en casa 5+ partidos tienden a continuar sin perder",
+    "category": "form",
+    "confidence": 0.744,
+    "sample_size": 21,
+    "hit_rate": 0.714,
+    "conditions": {
+      "home_unbeaten_streak": 5
+    },
+    "prediction": {
+      "expected": "Win or Draw",
+      "market": "double_chance"
+    },
+    "discovered_at": "2026-04-27T17:16:20.760432",
+    "last_validated": "2026-04-27T17:16:20.760433",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "High SOT → Team Scores",
+    "description": "Equipos con >5 remates al arco promedio marcan al menos 1 gol",
+    "category": "statistical",
+    "confidence": 0.789,
+    "sample_size": 38,
+    "hit_rate": 0.789,
+    "conditions": {
+      "avg_shots_on_target_last_5": ">5"
+    },
+    "prediction": {
+      "expected": "Team to Score",
+      "market": "team_goals"
+    },
+    "discovered_at": "2026-04-27T17:16:20.764398",
+    "last_validated": "2026-04-27T17:16:20.764401",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "Liga goleadora: UEFA Champions League",
+    "description": "Más de 2.5 goles en 68% de los partidos de esta liga",
+    "category": "league",
+    "confidence": 0.682,
+    "sample_size": 22,
+    "hit_rate": 0.682,
+    "conditions": {
+      "league_id": 2,
+      "over25_rate": 0.6818181818181818
+    },
+    "prediction": {
+      "expected": "Over 2.5",
+      "market": "over_under_25"
+    },
+    "discovered_at": "2026-04-27T17:16:20.764812",
+    "last_validated": "2026-04-27T17:16:20.764814",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "Liga goleadora: La Liga",
+    "description": "Más de 2.5 goles en 66% de los partidos de esta liga",
+    "category": "league",
+    "confidence": 0.655,
+    "sample_size": 29,
+    "hit_rate": 0.655,
+    "conditions": {
+      "league_id": 140,
+      "over25_rate": 0.6551724137931034
+    },
+    "prediction": {
+      "expected": "Over 2.5",
+      "market": "over_under_25"
+    },
+    "discovered_at": "2026-04-27T17:16:20.764830",
+    "last_validated": "2026-04-27T17:16:20.764831",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "Defensive Wall (Team 438)",
+    "description": "Equipo con 64% clean sheets (reciente: 60%)",
+    "category": "team_statistical",
+    "confidence": 0.736,
+    "sample_size": 11,
+    "hit_rate": 0.636,
+    "conditions": {
+      "team_id": 438,
+      "clean_sheet_rate": 0.6363636363636364
+    },
+    "prediction": {
+      "expected": "Under 0.5 opponent goals",
+      "market": "team_clean_sheet"
+    },
+    "discovered_at": "2026-04-27T17:16:20.765451",
+    "last_validated": "2026-04-27T17:16:20.765452",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  },
+  {
+    "name": "Home Dominant (Team 488)",
+    "description": "Equipo gana 70% en casa vs 38% fuera (diferencia: 32%)",
+    "category": "situational",
+    "confidence": 0.7,
+    "sample_size": 10,
+    "hit_rate": 0.7,
+    "conditions": {
+      "team_id": 488,
+      "home_win_rate": 0.7,
+      "away_win_rate": 0.38461538461538464
+    },
+    "prediction": {
+      "expected": "Home Win when playing at home",
+      "market": "match_result"
+    },
+    "discovered_at": "2026-04-27T17:16:20.765654",
+    "last_validated": "2026-04-27T17:16:20.765655",
+    "times_triggered": 0,
+    "times_correct": 0,
+    "live_accuracy": 0.0
+  }
+]

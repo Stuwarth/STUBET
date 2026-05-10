@@ -1,0 +1,74 @@
+{
+  "cached_at": "2026-04-15T11:37:03.703180",
+  "data": [
+    {
+      "player": "Wisdom Mike",
+      "position": "F",
+      "injury_type": "Hip Injury",
+      "status": "Baja",
+      "details": "Hip Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Sven Ulreich",
+      "position": "G",
+      "injury_type": "No disponible",
+      "status": "Baja",
+      "details": "No disponible",
+      "return_date": "28/04/2026",
+      "source": "sofascore"
+    },
+    {
+      "player": "Leon Klanac",
+      "position": "Goalkeeper",
+      "injury_type": "Hamstring injury",
+      "status": "Baja",
+      "details": "Hamstring injury | Desde 01/01/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Lennart Karl",
+      "position": "M",
+      "injury_type": "Muscle Injury",
+      "status": "Baja",
+      "details": "Muscle Injury",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "David Daiber",
+      "position": "M",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Cassiano Kiala",
+      "position": "D",
+      "injury_type": "Ankle Injury",
+      "status": "Baja",
+      "details": "Ankle Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Bara Sapoko Ndiaye",
+      "position": "Central Midfield",
+      "injury_type": "No eligibility",
+      "status": "Baja",
+      "details": "No eligibility | Desde 03/01/2026 | Vuelve 30/06/2026",
+      "return_date": "30/06/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Serge Gnabry",
+      "position": "F/M",
+      "injury_type": "Knee",
+      "status": "Duda",
+      "details": "Knee",
+      "return_date": "<i>Subscribers Only</i>",
+      "source": "rotowire"
+    }
+  ]
+}

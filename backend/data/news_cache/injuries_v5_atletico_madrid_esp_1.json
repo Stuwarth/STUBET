@@ -1,0 +1,40 @@
+{
+  "cached_at": "2026-04-15T11:42:23.514077",
+  "data": [
+    {
+      "player": "Pablo Barrios",
+      "position": "Central Midfield",
+      "injury_type": "Muscle injury",
+      "status": "Baja",
+      "details": "Muscle injury | Desde 10/03/2026 | Vuelve 17/04/2026",
+      "return_date": "17/04/2026",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Marc Pubill",
+      "position": "D",
+      "injury_type": "No disponible",
+      "status": "Baja",
+      "details": "No disponible",
+      "source": "sofascore"
+    },
+    {
+      "player": "José María Giménez",
+      "position": "Centre-Back",
+      "injury_type": "Muscle injury",
+      "status": "Baja",
+      "details": "Muscle injury | Desde 07/04/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    },
+    {
+      "player": "Dávid Hancko",
+      "position": "Centre-Back",
+      "injury_type": "Ankle injury",
+      "status": "Baja",
+      "details": "Ankle injury | Desde 08/04/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

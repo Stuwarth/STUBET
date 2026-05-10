@@ -1,0 +1,32 @@
+{
+  "cached_at": "2026-04-17T14:30:27.669312",
+  "data": [
+    {
+      "player": "Sergi Roberto",
+      "position": "Central Midfield",
+      "injury_type": "unknown injury",
+      "status": "Baja",
+      "details": "unknown injury | Desde 13/04/2026 | Vuelve 20/04/2026",
+      "source": "transfermarkt",
+      "return_date": "20/04/2026"
+    },
+    {
+      "player": "Jayden Addai",
+      "position": "M",
+      "injury_type": "Achilles Tendon Injury",
+      "status": "Baja",
+      "details": "Achilles Tendon Injury",
+      "return_date": "30/06/2026",
+      "source": "sofascore"
+    },
+    {
+      "player": "Adrian Lahdo",
+      "position": "Central Midfield",
+      "injury_type": "unknown injury",
+      "status": "Baja",
+      "details": "unknown injury | Desde 28/03/2026",
+      "return_date": "",
+      "source": "transfermarkt"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "cached_at": "2026-05-03T12:44:56.666858",
+  "data": [
+    {
+      "player": "Éder Militão",
+      "position": "D",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Thibaut Courtois",
+      "position": "G",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Rodrygo",
+      "position": "F",
+      "injury_type": "Cruciate Ligament Injury",
+      "status": "Baja",
+      "details": "Cruciate Ligament Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Kylian Mbappé",
+      "position": "F",
+      "injury_type": "Hamstring Injury",
+      "status": "Baja",
+      "details": "Hamstring Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Dani Carvajal",
+      "position": "D",
+      "injury_type": "Leg Injury",
+      "status": "Baja",
+      "details": "Leg Injury",
+      "source": "sofascore"
+    },
+    {
+      "player": "Arda Güler",
+      "position": "M",
+      "injury_type": "Thigh Injury",
+      "status": "Baja",
+      "details": "Thigh Injury",
+      "source": "sofascore"
+    }
+  ]
+}

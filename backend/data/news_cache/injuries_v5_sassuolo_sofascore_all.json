@@ -1,0 +1,66 @@
+{
+  "cached_at": "2026-04-17T14:30:22.109849",
+  "data": [
+    {
+      "player": "Josh Doig",
+      "position": "D",
+      "injury_type": "Suspension por acumulacion de amarillas",
+      "status": "Suspendido",
+      "details": "yellow_card_accumulation_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Domenico Berardi",
+      "position": "F",
+      "injury_type": "Suspension por roja",
+      "status": "Suspendido",
+      "details": "red_card_suspension",
+      "source": "sofascore"
+    },
+    {
+      "player": "Filippo Romagna",
+      "position": "D",
+      "injury_type": "Knee Injury",
+      "status": "Baja",
+      "details": "Knee Injury",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "Fali Candé",
+      "position": "Centre-Back",
+      "injury_type": "Cruciate ligament tear",
+      "status": "Baja",
+      "details": "Cruciate ligament tear | Desde 14/01/2026 | Vuelve 30/06/2026",
+      "source": "transfermarkt",
+      "return_date": "30/06/2026"
+    },
+    {
+      "player": "Edoardo Pieragnolo",
+      "position": "Left-Back",
+      "injury_type": "Cruciate ligament injury",
+      "status": "Baja",
+      "details": "Cruciate ligament injury | Desde 01/10/2025 | Vuelve 01/05/2026",
+      "source": "transfermarkt",
+      "return_date": "01/05/2026"
+    },
+    {
+      "player": "Darryl Bakola",
+      "position": "Attacking Midfield",
+      "injury_type": "unknown injury",
+      "status": "Baja",
+      "details": "unknown injury | Desde 11/04/2026",
+      "source": "transfermarkt",
+      "return_date": ""
+    },
+    {
+      "player": "Daniel Boloca",
+      "position": "M",
+      "injury_type": "Meniscus Injury",
+      "status": "Baja",
+      "details": "Meniscus Injury",
+      "return_date": "",
+      "source": "sofascore"
+    }
+  ]
+}

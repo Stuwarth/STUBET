@@ -1,0 +1,32 @@
+{
+  "cached_at": "2026-04-17T16:55:02.838510",
+  "data": [
+    {
+      "player": "Régis Gurtner",
+      "position": "G",
+      "injury_type": "Hamstring",
+      "status": "Baja",
+      "details": "Hamstring",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "Kyllian Antonio",
+      "position": "D",
+      "injury_type": "Foot Injury",
+      "status": "Baja",
+      "details": "Foot Injury",
+      "return_date": "",
+      "source": "sofascore"
+    },
+    {
+      "player": "Jonathan Gradit",
+      "position": "D",
+      "injury_type": "Broken Leg",
+      "status": "Baja",
+      "details": "Broken Leg",
+      "return_date": "",
+      "source": "sofascore"
+    }
+  ]
+}
