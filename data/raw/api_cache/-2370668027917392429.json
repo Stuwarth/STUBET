@@ -1,1 +1,0 @@
-{"get": "teams", "parameters": {"search": "Atl\u00e9tico Madrid"}, "errors": {"search": "The Search field may only contain alpha-numeric characters and spaces."}, "results": 0, "paging": {"current": 1, "total": 1}, "response": []}

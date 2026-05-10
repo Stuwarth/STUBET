@@ -1,1 +1,0 @@
-{"get": "fixtures", "parameters": {"team": "456", "season": "2022", "status": "FT"}, "errors": {"requests": "You have reached the request limit for the day, Go to https://dashboard.api-football.com to upgrade your plan."}, "results": 0, "paging": {"current": 1, "total": 1}, "response": []}
