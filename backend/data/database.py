@@ -364,8 +364,31 @@ class DatabaseManager:
                 cursor.execute("ALTER TABLE manual_picks ADD COLUMN bookmaker TEXT DEFAULT 'lasplatas'")
                 conn.commit()
                 print("[DB Migration] manual_picks: added bookmaker column")
+            if 'bet_type' not in columns:
+                cursor.execute("ALTER TABLE manual_picks ADD COLUMN bet_type TEXT DEFAULT 'single'")
+                conn.commit()
+            if 'cashout_amount' not in columns:
+                cursor.execute("ALTER TABLE manual_picks ADD COLUMN cashout_amount REAL DEFAULT NULL")
+                conn.commit()
+            if 'is_draw_no_bet' not in columns:
+                cursor.execute("ALTER TABLE manual_picks ADD COLUMN is_draw_no_bet INTEGER DEFAULT 0")
+                conn.commit()
         except Exception as e:
-            print(f"[DB Migration] manual_picks: {e}")
+            print(f"[DB Migration] manual_picks schema update: {e}")
+
+        # Parlay Legs
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS parlay_legs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                parlay_pick_id INTEGER NOT NULL,
+                match_name TEXT NOT NULL,
+                market TEXT NOT NULL,
+                odds REAL NOT NULL,
+                result TEXT DEFAULT 'PENDING',
+                is_draw_no_bet INTEGER DEFAULT 0,
+                FOREIGN KEY (parlay_pick_id) REFERENCES manual_picks(id) ON DELETE CASCADE
+            )
+        """)
         
         # Create indexes
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_matches_date ON matches(match_date)")
@@ -1025,39 +1048,30 @@ class DatabaseManager:
             return result
 
     def add_manual_pick(self, pick_data: dict) -> int:
-        """Adds a manual pick or ticket to the database."""
+        """Adds a manual pick to the database and deducts stake from bankroll."""
         conn = self.get_connection()
         cursor = conn.cursor()
-        bk = pick_data.get('bookmaker', 'lasplatas')
-        placed_at = pick_data.get('placed_at')
         
-        if placed_at:
-            cursor.execute("""
-                INSERT INTO manual_picks (month_year, bookmaker, ticket_id, match_name, market, odds, stake, result, profit, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', 0.0, ?)
-            """, (
-                pick_data.get('month_year'),
-                bk,
-                pick_data.get('ticket_id'),
-                pick_data.get('match_name'),
-                pick_data.get('market'),
-                pick_data.get('odds'),
-                pick_data.get('stake'),
-                placed_at
-            ))
-        else:
-            cursor.execute("""
-                INSERT INTO manual_picks (month_year, bookmaker, ticket_id, match_name, market, odds, stake, result, profit)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'PENDING', 0.0)
-            """, (
-                pick_data.get('month_year'),
-                bk,
-                pick_data.get('ticket_id'),
-                pick_data.get('match_name'),
-                pick_data.get('market'),
-                pick_data.get('odds'),
-                pick_data.get('stake')
-            ))
+        month_year = pick_data.get('month_year')
+        bk = pick_data.get('bookmaker', 'lasplatas')
+        stake = float(pick_data.get('stake', 0))
+        
+        cursor.execute("""
+            INSERT INTO manual_picks (month_year, match_name, market, odds, stake, ticket_id, bookmaker, created_at, bet_type, is_draw_no_bet)
+            VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP), ?, ?)
+        """, (
+            month_year,
+            pick_data.get('match_name'),
+            pick_data.get('market'),
+            pick_data.get('odds'),
+            stake,
+            pick_data.get('ticket_id'),
+            bk,
+            pick_data.get('placed_at'),
+            pick_data.get('bet_type', 'single'),
+            pick_data.get('is_draw_no_bet', 0)
+        ))
+        pick_id = cursor.lastrowid
         conn.commit()
         
         # Deduct stake from the correct bookmaker's bankroll
@@ -1075,9 +1089,9 @@ class DatabaseManager:
         conn = self.get_connection()
         cursor = conn.cursor()
         if bookmaker:
-            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker FROM manual_picks WHERE month_year = ? AND bookmaker = ? ORDER BY created_at DESC", (month_year, bookmaker))
+            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker, bet_type, is_draw_no_bet, cashout_amount FROM manual_picks WHERE month_year = ? AND bookmaker = ? ORDER BY created_at DESC", (month_year, bookmaker))
         else:
-            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker FROM manual_picks WHERE month_year = ? ORDER BY created_at DESC", (month_year,))
+            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker, bet_type, is_draw_no_bet, cashout_amount FROM manual_picks WHERE month_year = ? ORDER BY created_at DESC", (month_year,))
         rows = cursor.fetchall()
         
         picks = []
@@ -1092,7 +1106,10 @@ class DatabaseManager:
                 "profit": r[6],
                 "date": r[7],
                 "ticket_id": r[8],
-                "bookmaker": r[9] if len(r) > 9 else 'lasplatas'
+                "bookmaker": r[9] if len(r) > 9 else 'lasplatas',
+                "bet_type": r[10] if len(r) > 10 else 'single',
+                "is_draw_no_bet": r[11] if len(r) > 11 else 0,
+                "cashout_amount": r[12] if len(r) > 12 else None
             })
         return picks
 
@@ -1102,9 +1119,9 @@ class DatabaseManager:
         cursor = conn.cursor()
         date_pattern = f"{date_str}%"
         if bookmaker:
-            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker FROM manual_picks WHERE created_at LIKE ? AND bookmaker = ? ORDER BY created_at DESC", (date_pattern, bookmaker))
+            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker, bet_type, is_draw_no_bet, cashout_amount FROM manual_picks WHERE created_at LIKE ? AND bookmaker = ? ORDER BY created_at DESC", (date_pattern, bookmaker))
         else:
-            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker FROM manual_picks WHERE created_at LIKE ? ORDER BY created_at DESC", (date_pattern,))
+            cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker, bet_type, is_draw_no_bet, cashout_amount FROM manual_picks WHERE created_at LIKE ? ORDER BY created_at DESC", (date_pattern,))
         rows = cursor.fetchall()
         
         picks = []
@@ -1112,7 +1129,10 @@ class DatabaseManager:
             picks.append({
                 "id": r[0], "match": r[1], "market": r[2], "odds": r[3], "stake": r[4],
                 "result": r[5], "profit": r[6], "date": r[7], "ticket_id": r[8],
-                "bookmaker": r[9] if len(r) > 9 else 'lasplatas'
+                "bookmaker": r[9] if len(r) > 9 else 'lasplatas',
+                "bet_type": r[10] if len(r) > 10 else 'single',
+                "is_draw_no_bet": r[11] if len(r) > 11 else 0,
+                "cashout_amount": r[12] if len(r) > 12 else None
             })
         return picks
 
@@ -1127,8 +1147,8 @@ class DatabaseManager:
             "odds": r[4], "stake": r[5], "bookmaker": r[6]
         } for r in rows]
 
-    def settle_manual_pick(self, pick_id: int, result: str) -> bool:
-        """Settles a manual pick as WON or LOST and updates the bankroll."""
+    def settle_manual_pick(self, pick_id: int, result: str, cashout_amount: float = None) -> bool:
+        """Settles a manual pick and updates the bankroll. Handles WON, LOST, VOID, CASHOUT, HALF_WON, HALF_LOST."""
         conn = self.get_connection()
         cursor = conn.cursor()
         
@@ -1151,10 +1171,27 @@ class DatabaseManager:
         elif result == 'LOST':
             profit = -stake
             # Bankroll already deducted stake when bet was placed, so no bankroll change on loss
+        elif result == 'VOID':
+            profit = 0.0
+            # Return full stake
+            cursor.execute("UPDATE bankroll_months SET current_bankroll = current_bankroll + ? WHERE month_year = ? AND bookmaker = ?", (stake, month_year, bk))
+        elif result == 'CASHOUT':
+            if cashout_amount is None: cashout_amount = 0.0
+            profit = cashout_amount - stake
+            # Return cashout amount
+            cursor.execute("UPDATE bankroll_months SET current_bankroll = current_bankroll + ? WHERE month_year = ? AND bookmaker = ?", (cashout_amount, month_year, bk))
+        elif result == 'HALF_WON':
+            profit = (stake * odds - stake) / 2
+            # Return full stake + half profit
+            cursor.execute("UPDATE bankroll_months SET current_bankroll = current_bankroll + ? + ? WHERE month_year = ? AND bookmaker = ?", (stake, profit, month_year, bk))
+        elif result == 'HALF_LOST':
+            profit = -(stake / 2)
+            # Return half stake
+            cursor.execute("UPDATE bankroll_months SET current_bankroll = current_bankroll + ? WHERE month_year = ? AND bookmaker = ?", (stake / 2, month_year, bk))
         else:
             return False
             
-        cursor.execute("UPDATE manual_picks SET result = ?, profit = ? WHERE id = ?", (result, profit, pick_id))
+        cursor.execute("UPDATE manual_picks SET result = ?, profit = ?, cashout_amount = ? WHERE id = ?", (result, profit, cashout_amount, pick_id))
         conn.commit()
         return True
 
@@ -1177,6 +1214,18 @@ class DatabaseManager:
             refund = stake
         elif result == 'WON':
             refund = -profit - stake
+        elif result == 'VOID':
+            refund = -stake
+        elif result == 'CASHOUT':
+            # cashout was returned, we reverse it
+            cursor.execute("SELECT cashout_amount FROM manual_picks WHERE id = ?", (pick_id,))
+            c_row = cursor.fetchone()
+            c_amt = c_row[0] if c_row and c_row[0] is not None else 0
+            refund = -c_amt
+        elif result == 'HALF_WON':
+            refund = -profit - stake
+        elif result == 'HALF_LOST':
+            refund = -(stake / 2)
         else:
             refund = stake
             
@@ -1191,7 +1240,7 @@ class DatabaseManager:
         """Get a single manual pick by ID."""
         conn = self.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker FROM manual_picks WHERE id = ?", (pick_id,))
+        cursor.execute("SELECT id, match_name, market, odds, stake, result, profit, created_at, ticket_id, bookmaker, bet_type, cashout_amount, is_draw_no_bet FROM manual_picks WHERE id = ?", (pick_id,))
         r = cursor.fetchone()
         if not r:
             return None
@@ -1205,7 +1254,10 @@ class DatabaseManager:
             "profit": r[6],
             "date": r[7],
             "ticket_id": r[8],
-            "bookmaker": r[9] if len(r) > 9 else 'lasplatas'
+            "bookmaker": r[9] if len(r) > 9 else 'lasplatas',
+            "bet_type": r[10] if len(r) > 10 else 'single',
+            "cashout_amount": r[11] if len(r) > 11 else None,
+            "is_draw_no_bet": r[12] if len(r) > 12 else 0
         }
 
     def update_manual_pick(self, pick_id: int, pick_data: dict) -> bool:
@@ -1240,7 +1292,7 @@ class DatabaseManager:
         # Update pick
         cursor.execute("""
             UPDATE manual_picks 
-            SET match_name = ?, market = ?, odds = ?, stake = ?, created_at = ?, bookmaker = ?
+            SET match_name = ?, market = ?, odds = ?, stake = ?, created_at = ?, bookmaker = ?, is_draw_no_bet = ?
             WHERE id = ?
         """, (
             pick_data.get('match_name'),
@@ -1249,8 +1301,76 @@ class DatabaseManager:
             new_stake,
             pick_data.get('placed_at'),
             new_bk,
+            pick_data.get('is_draw_no_bet', 0),
             pick_id
         ))
+        
+        conn.commit()
+        return True
+
+    def add_parlay_leg(self, pick_id: int, leg_data: dict):
+        """Add a leg to a parlay manual pick."""
+        conn = self.get_connection()
+        conn.execute("""
+            INSERT INTO parlay_legs (parlay_pick_id, match_name, market, odds, is_draw_no_bet)
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            pick_id,
+            leg_data.get('match_name'),
+            leg_data.get('market'),
+            leg_data.get('odds'),
+            leg_data.get('is_draw_no_bet', 0)
+        ))
+        conn.commit()
+
+    def get_parlay_legs(self, pick_id: int) -> list:
+        conn = self.get_connection()
+        rows = conn.execute("SELECT * FROM parlay_legs WHERE parlay_pick_id = ?", (pick_id,)).fetchall()
+        return [dict(r) for r in rows]
+
+    def settle_parlay_leg(self, leg_id: int, result: str) -> bool:
+        """Sets the result of an individual leg. If all legs are settled, it settles the parent parlay pick."""
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        # Get leg and parent pick
+        cursor.execute("SELECT parlay_pick_id FROM parlay_legs WHERE id = ?", (leg_id,))
+        row = cursor.fetchone()
+        if not row: return False
+        parlay_id = row[0]
+        
+        # Settle leg
+        cursor.execute("UPDATE parlay_legs SET result = ? WHERE id = ?", (result, leg_id))
+        
+        # Check all legs
+        cursor.execute("SELECT odds, result FROM parlay_legs WHERE parlay_pick_id = ?", (parlay_id,))
+        legs = cursor.fetchall()
+        
+        all_settled = all(l[1] != 'PENDING' for l in legs)
+        
+        if all_settled:
+            any_lost = False
+            effective_odds = 1.0
+            
+            for leg_odds, leg_result in legs:
+                if leg_result in ('LOST', 'HALF_LOST'):
+                    any_lost = True
+                    break
+                elif leg_result == 'WON':
+                    effective_odds *= leg_odds
+                elif leg_result == 'HALF_WON':
+                    # Simplified logic for half won leg in parlay
+                    effective_odds *= (1.0 + (leg_odds - 1.0) / 2.0)
+                elif leg_result == 'VOID':
+                    effective_odds *= 1.0
+            
+            # Recalculate parent odds and settle it
+            if any_lost:
+                self.settle_manual_pick(parlay_id, 'LOST')
+            else:
+                # Need to update the parlay effective odds
+                cursor.execute("UPDATE manual_picks SET odds = ? WHERE id = ?", (effective_odds, parlay_id))
+                self.settle_manual_pick(parlay_id, 'WON')
         
         conn.commit()
         return True

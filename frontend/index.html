@@ -6,7 +6,7 @@
     <title>🧠 STUBET — Machine Learning Betting Intelligence</title>
     <meta name="description" content="Sistema de predicción deportiva con Machine Learning. Detección de value bets, análisis estadístico, patrones y tracking de rendimiento en tiempo real.">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="static/css/style.css?v=20260429">
+    <link rel="stylesheet" href="static/css/style.css?v=20260510">
 </head>
 <body>
     <!-- Background Effects -->
@@ -87,20 +87,6 @@
                 <h1 class="page-title" id="page-title">Dashboard</h1>
             </div>
             <div class="header-right">
-                <div class="stat-card glass-card">
-                    <div class="stat-header">
-                        <span class="stat-label">🟢 LasPlatas</span>
-                    </div>
-                    <div id="header-bankroll-lp" class="stat-value">Bs 0</div>
-                    <div id="header-profit-lp" style="font-size: 0.75rem; font-weight: 600; opacity: 0.9;">Bs +0</div>
-                </div>
-                <div class="stat-card glass-card">
-                    <div class="stat-header">
-                        <span class="stat-label">🟡 MetaBet</span>
-                    </div>
-                    <div id="header-bankroll-mb" class="stat-value">Bs 0</div>
-                    <div id="header-profit-mb" style="font-size: 0.75rem; font-weight: 600; opacity: 0.9;">Bs +0</div>
-                </div>
                 <div class="header-stats">
                     <div class="header-stat">
                         <span class="stat-label">Accuracy</span>
@@ -110,10 +96,6 @@
                         <span class="stat-label">ROI</span>
                         <span class="stat-value" id="header-roi">—</span>
                     </div>
-                </div>
-                <div class="header-filter-group" style="display:flex; gap:0.5rem; align-items:center;">
-                    <span>📅</span>
-                    <input type="date" id="global-date-filter" class="input-date" onchange="refreshData()">
                 </div>
                 <button class="btn btn-primary btn-glow" id="btn-refresh" onclick="refreshData()">
                     <span>🔄</span> Actualizar
@@ -127,7 +109,7 @@
                 <div class="stat-card glass-card">
                     <div class="stat-card-icon" style="background: linear-gradient(135deg, #0ea5e9, #14b8a6);">🎯</div>
                     <div class="stat-card-content">
-                        <span class="stat-card-label">Total Predicciones</span>
+                        <span class="stat-card-label">Total Picks del Mes</span>
                         <span class="stat-card-value count-up" id="stat-total">0</span>
                     </div>
                     <div class="stat-card-trend up"><span>↑</span> <span id="stat-total-trend">+12 hoy</span></div>
@@ -135,7 +117,7 @@
                 <div class="stat-card glass-card">
                     <div class="stat-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">✅</div>
                     <div class="stat-card-content">
-                        <span class="stat-card-label">Precisión Global</span>
+                        <span class="stat-card-label">Accuracy (W/Total)</span>
                         <span class="stat-card-value count-up" id="stat-accuracy">0%</span>
                     </div>
                     <div class="stat-card-trend" id="accuracy-trend"><span>—</span></div>
@@ -151,7 +133,7 @@
                 <div class="stat-card glass-card">
                     <div class="stat-card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">💎</div>
                     <div class="stat-card-content">
-                        <span class="stat-card-label">Value Bets</span>
+                        <span class="stat-card-label">Picks Pendientes</span>
                         <span class="stat-card-value count-up" id="stat-valuebets">0</span>
                     </div>
                     <div class="stat-card-trend up" id="vb-trend"><span>🔥</span> <span>Activos</span></div>
@@ -161,7 +143,7 @@
             <div class="charts-grid">
                 <div class="chart-card glass-card">
                     <div class="chart-header">
-                        <h3>📊 Rendimiento por Mercado</h3>
+                        <h3>📊 Rendimiento por Casa de Apuestas</h3>
                         <div class="chart-filter">
                             <select id="market-filter" class="input-select">
                                 <option value="all">Todos</option>
@@ -177,7 +159,7 @@
                 </div>
                 <div class="chart-card glass-card">
                     <div class="chart-header">
-                        <h3>📈 Precisión Diaria (30 días)</h3>
+                        <h3>📈 Profit Acumulado del Mes</h3>
                     </div>
                     <div class="chart-body">
                         <canvas id="daily-chart" width="600" height="300"></canvas>
@@ -187,7 +169,7 @@
 
             <div class="table-card glass-card">
                 <div class="table-header">
-                    <h3>🎯 Predicciones Recientes</h3>
+                    <h3>🎯 Últimas Apuestas Registradas</h3>
                     <div class="table-actions">
                         <button class="btn btn-secondary btn-sm" onclick="loadPredictions()">Ver Todas</button>
                     </div>
@@ -195,7 +177,7 @@
                 <div class="table-wrapper">
                     <table class="data-table" id="recent-predictions-table">
                         <thead>
-                            <tr><th>Fecha</th><th>Partido</th><th>Liga</th><th>Mercado</th><th>Predicción</th><th>Confianza</th><th>Value Bet</th><th>Resultado</th></tr>
+                            <tr><th>Fecha</th><th>Casa</th><th>Partido</th><th>Mercado</th><th>Cuota</th><th>Stake</th><th>Resultado</th><th>Acción</th></tr>
                         </thead>
                         <tbody id="recent-predictions-body"></tbody>
                     </table>
@@ -478,16 +460,26 @@
                         <input type="datetime-local" id="manual-placed-at" class="input-field" title="Fecha (Opcional)">
                         <button class="btn btn-accent" onclick="addManualPick()">Guardar Pick</button>
                     </div>
+                    <div style="margin-top: 8px;">
+                        <label style="font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="manual-dnb"> Es Apuesta sin Empate (DNB)
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Combinada Bet Form -->
                 <div id="combi-bet-form" style="display: none;">
                     <!-- Add Leg Row -->
-                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 10px;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 5px;">
                         <input type="text" id="combi-match" class="input-field" placeholder="Partido (Ej: Espanyol vs Real Madrid)">
                         <input type="text" id="combi-market" class="input-field" placeholder="Mercado (Ej: +4.5 Tarjetas)">
                         <input type="number" step="0.01" id="combi-leg-odds" class="input-field" placeholder="Cuota">
                         <button class="btn btn-primary" onclick="addCombiLeg()" style="white-space: nowrap;">➕ Agregar</button>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="font-size: 0.85rem; color: #cbd5e1; display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="combi-dnb"> Esta selección es Sin Empate
+                        </label>
                     </div>
                     <!-- Legs List -->
                     <div id="combi-legs-list" style="margin-bottom: 10px;"></div>
@@ -564,7 +556,12 @@
                 <div class="table-header" style="flex-wrap: wrap; gap: 10px;">
                     <h3>📋 Historial de Picks</h3>
                     <div class="filter-group">
-                        <label>Filtrar por Día:</label>
+                        <label>Filtrar:</label>
+                        <select id="filter-bookmaker" class="input-field" onchange="loadBankrollData()" style="width: 120px;">
+                            <option value="">Todas</option>
+                            <option value="lasplatas">🟢 LasPlatas</option>
+                            <option value="metabet">🟡 Metabet</option>
+                        </select>
                         <input type="date" id="filter-pick-date" class="input-field" onchange="loadBankrollData()">
                         <button class="btn btn-secondary btn-sm" onclick="resetPickFilter()">Reset</button>
                         <button class="btn btn-primary btn-sm" onclick="autoResolvePicks()" style="margin-left: 10px;">🤖 Auto-Resolver</button>
@@ -594,7 +591,43 @@
                 <p>Estado y rendimiento de los modelos de predicción</p>
             </div>
             <div class="models-grid" id="models-grid"></div>
-            <div class="actions-card glass-card" style="margin-top: 1.5rem;">
+
+            <!-- MOTOR DE ALERTAS EN VIVO -->
+            <div class="glass-card" style="padding:1.5rem; margin-top:1.5rem; margin-bottom:1.5rem; border:1px solid rgba(99,102,241,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <div>
+                        <h3 style="margin:0;">🔴 Motor de Alertas en Vivo</h3>
+                        <p style="font-size:0.85rem; color:var(--text-secondary); margin:4px 0 0 0;">
+                            Escanea partidos en vivo cada 5 min y envía alertas a Telegram cuando hay value
+                        </p>
+                    </div>
+                    <div id="live-alert-status-badge" style="padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; background:rgba(239,68,68,0.2); color:#ef4444;">
+                        DETENIDO
+                    </div>
+                </div>
+                
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1rem;">
+                    <div style="text-align:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px;">
+                        <div style="font-size:1.2rem; font-weight:700;" id="alerts-sent-count">0</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">Alertas hoy</div>
+                    </div>
+                    <div style="text-align:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px;">
+                        <div style="font-size:1.2rem; font-weight:700;">5 min</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">Intervalo scan</div>
+                    </div>
+                    <div style="text-align:center; background:rgba(0,0,0,0.2); padding:8px; border-radius:8px;">
+                        <div style="font-size:1.2rem; font-weight:700;">1.50+</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">Cuota mínima</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-primary" style="flex:1;" onclick="startLiveAlerts()">▶ Iniciar Alertas en Vivo</button>
+                    <button class="btn btn-secondary" style="flex:1;" onclick="stopLiveAlerts()">■ Detener</button>
+                </div>
+            </div>
+
+            <div class="actions-card glass-card">
                 <h3>⚡ Acciones</h3>
                 <div class="action-buttons">
                     <button class="btn btn-accent btn-lg" onclick="runPipeline()" id="btn-pipeline">🚀 Ejecutar Pipeline (API-Football)</button>
@@ -749,6 +782,22 @@
         </div>
     </div>
 
-    <script src="static/js/app.js?v=20260505_v5"></script>
+    <!-- Modal para Deep Analysis -->
+    <div id="deep-analysis-modal" class="modal-overlay">
+        <div class="modal-content glass-card" style="max-width: 90%; max-height: 90vh; overflow-y: auto; width: 1200px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="da-modal-title">🔥 Análisis Profundo</h3>
+                <div style="display:flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="downloadDeepAnalysisPDF()">📄 Descargar PDF</button>
+                    <button class="close-modal" onclick="closeDeepAnalysisModal()">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body" id="da-modal-body" style="padding: 20px;">
+                <!-- Contenido generado por JS -->
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/app.js?v=20260510_dashboard_real"></script>
 </body>
 </html>

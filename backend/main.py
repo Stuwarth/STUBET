@@ -32,7 +32,7 @@ def main():
     try:
         run_backfill()
     except Exception as e:
-        print(f"⚠️ Aviso: Hubo un problema menor en la auto-actualización: {e}")
+        print(f"[!] Aviso: Hubo un problema menor en la auto-actualizacion: {e}")
         print("Continuando con el inicio del servidor principal...")
     
     start_server()

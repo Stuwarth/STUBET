@@ -26,6 +26,29 @@ let liveClockTickerTimer = null;
 let liveScoreboardRequestInFlight = false;
 
 // ==================== INITIALIZATION ====================
+function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    if (!container) {
+        console.log(`[Toast] ${type}: ${msg}`);
+        return;
+    }
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = msg;
+    toast.style.padding = '10px 20px';
+    toast.style.marginBottom = '10px';
+    toast.style.borderRadius = '8px';
+    toast.style.color = '#fff';
+    toast.style.background = type === 'error' ? 'rgba(239, 68, 68, 0.9)' : (type === 'success' ? 'rgba(16, 185, 129, 0.9)' : 'rgba(59, 130, 246, 0.9)');
+    toast.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    toast.style.transition = 'opacity 0.3s';
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     initNavigation();
     initSettings();
@@ -298,46 +321,110 @@ async function apiCall(endpoint, method = 'GET', body = null, requestOptions = {
 
 // ==================== DASHBOARD ====================
 async function loadDashboard() {
-    const date = document.getElementById('global-date-filter')?.value;
-    let url = '/dashboard';
-    if (date) url += `?date=${date}`;
-
-    const data = await apiCall(url);
+    const data = await apiCall('/dashboard/real');
     if (!data) { renderEmptyDashboard(); return; }
 
     appState.dashboardData = data;
 
-    const perf = data.performance || {};
-    const overview = perf.overview || {};
-    const roi = perf.roi || {};
+    const s = data.summary || {};
+    const bk = data.bankroll || {};
+    const lp = bk.lasplatas || {};
+    const mb = bk.metabet || {};
 
-    animateValue('stat-total', 0, overview.total || 0, 800);
-    document.getElementById('stat-accuracy').textContent = (overview.accuracy || 0) + '%';
-    document.getElementById('stat-roi').textContent = (roi.roi || 0) + '%';
-    document.getElementById('stat-valuebets').textContent = overview.total || 0;
+    // ── Stat cards ──────────────────────────────────
+    animateValue('stat-total', 0, s.total_picks || 0, 800);
+    document.getElementById('stat-accuracy').textContent = (s.accuracy || 0) + '%';
+    document.getElementById('stat-roi').textContent = (s.roi || 0) + '%';
+    document.getElementById('stat-valuebets').textContent = s.pending || 0;
 
-    document.getElementById('header-accuracy').textContent = (overview.accuracy || 0) + '%';
-    const roiValue = roi.roi || 0;
+    document.getElementById('header-accuracy').textContent = (s.accuracy || 0) + '%';
     const headerRoi = document.getElementById('header-roi');
-    headerRoi.textContent = roiValue + '%';
-    headerRoi.style.color = roiValue >= 0 ? '#10b981' : '#ef4444';
+    headerRoi.textContent = (s.roi || 0) + '%';
+    headerRoi.style.color = s.roi >= 0 ? '#10b981' : '#ef4444';
 
+    // Accuracy trend
     const accTrend = document.getElementById('accuracy-trend');
-    const accuracyVal = overview.accuracy || 0;
-    if (accuracyVal >= 60) {
+    if (s.accuracy >= 60) {
         accTrend.className = 'stat-card-trend up';
         accTrend.innerHTML = '<span>↑</span> Excelente';
-    } else if (accuracyVal >= 50) {
+    } else if (s.accuracy >= 50) {
         accTrend.className = 'stat-card-trend';
         accTrend.innerHTML = '<span>→</span> Estable';
-    } else {
+    } else if (s.accuracy > 0) {
         accTrend.className = 'stat-card-trend down';
         accTrend.innerHTML = '<span>↓</span> Mejorable';
+    } else {
+        accTrend.className = 'stat-card-trend';
+        accTrend.innerHTML = '<span>—</span>';
     }
 
-    drawMarketChart(perf.by_market || []);
-    drawDailyChart(perf.daily_performance || []);
-    renderRecentPredictions(perf.recent_predictions || []);
+    // Total picks trend
+    const totalTrend = document.getElementById('stat-total-trend');
+    if (totalTrend) {
+        totalTrend.textContent = `${s.won || 0}W / ${s.lost || 0}L`;
+    }
+
+    // ROI trend
+    const roiTrend = document.getElementById('roi-trend');
+    if (roiTrend) {
+        const p = s.profit || 0;
+        roiTrend.className = p >= 0 ? 'stat-card-trend up' : 'stat-card-trend down';
+        roiTrend.innerHTML = `<span>${p >= 0 ? '↑' : '↓'}</span> Bs ${p >= 0 ? '+' : ''}${p.toFixed(0)}`;
+    }
+
+    // Pending trend
+    const vbTrend = document.getElementById('vb-trend');
+    if (vbTrend) {
+        vbTrend.innerHTML = `<span>⏳</span> <span>Por resolver</span>`;
+    }
+
+    // ── Bankroll cards in performance ─────────────────────
+    const lpEl = document.getElementById('bankroll-lp');
+    if (lpEl) {
+        lpEl.textContent = lp.current > 0 ? `Bs ${lp.current.toFixed(2)}` : 'Por fijar';
+    }
+    const mbEl = document.getElementById('bankroll-mb');
+    if (mbEl) {
+        mbEl.textContent = mb.current > 0 ? `Bs ${mb.current.toFixed(2)}` : 'Por fijar';
+    }
+    const lpProfit = document.getElementById('lp-monthly-profit');
+    if (lpProfit) {
+        const d = lp.diff || 0;
+        lpProfit.textContent = `Bs ${d >= 0 ? '+' : ''}${d.toFixed(2)}`;
+        lpProfit.style.color = d >= 0 ? '#10b981' : '#ef4444';
+    }
+    const mbProfit = document.getElementById('mb-monthly-profit');
+    if (mbProfit) {
+        const d = mb.diff || 0;
+        mbProfit.textContent = `Bs ${d >= 0 ? '+' : ''}${d.toFixed(2)}`;
+        mbProfit.style.color = d >= 0 ? '#f59e0b' : '#ef4444';
+    }
+
+    // ── Streak ────────────────────────────────────────
+    const streakEl = document.getElementById('streak-display');
+    if (streakEl) {
+        if (s.streak_count > 0 && s.streak_type) {
+            streakEl.textContent = `${s.streak_count} ${s.streak_type === 'WON' ? '🟢 Ganadas' : '🔴 Perdidas'}`;
+            streakEl.style.color = s.streak_type === 'WON' ? '#10b981' : '#ef4444';
+        } else {
+            streakEl.textContent = '—';
+        }
+    }
+
+    // ── Profit ───────────────────────────────────────
+    const profitEl = document.getElementById('profit-display');
+    if (profitEl) {
+        const p = s.profit || 0;
+        profitEl.textContent = `Bs ${p >= 0 ? '+' : ''}${p.toFixed(0)}`;
+        profitEl.style.color = p >= 0 ? '#10b981' : '#ef4444';
+    }
+
+    // ── Recent picks table ─────────────────────
+    renderRecentPicksInDashboard(data.recent_picks || []);
+
+    // ── Charts ─────────────────────
+    renderBookmakerChart(data.bookmaker_stats || {});
+    drawProfitChart(data.profit_chart || []);
 }
 
 function renderEmptyDashboard() {
@@ -346,9 +433,280 @@ function renderEmptyDashboard() {
     document.getElementById('stat-roi').textContent = '—';
     document.getElementById('stat-valuebets').textContent = '0';
     document.getElementById('recent-predictions-body').innerHTML = `
-        <tr><td colspan="8" class="empty-state"><div style="padding: 2rem;">🎯 Sin predicciones — Ejecuta el pipeline o conecta tus APIs</div></td></tr>
+        <tr><td colspan="8" class="empty-state"><div style="padding: 2rem;">
+            &#128181; Sin apuestas registradas — Ve a <strong>Rend. & Bankroll</strong> para agregar picks
+        </div></td></tr>
     `;
 }
+
+// Dashboard recent picks table
+function renderRecentPicksInDashboard(picks) {
+    const tbody = document.getElementById('recent-predictions-body');
+    if (!tbody) return;
+
+    if (!picks || picks.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-state">
+            <div style="padding:2rem;">
+                &#128181; Sin apuestas registradas este mes —
+                Ve a <strong>Rend. & Bankroll</strong> para agregar picks
+            </div></td></tr>`;
+        return;
+    }
+
+    const BK_COLORS = { lasplatas: '#10b981', metabet: '#f59e0b' };
+
+    tbody.innerHTML = picks.map(p => {
+        const date = p.date
+            ? new Date(p.date).toLocaleDateString('es',
+                {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})
+            : '—';
+
+        const bkColor = BK_COLORS[p.bookmaker] || '#94a3b8';
+        const bkLabel = p.bookmaker === 'metabet' ? 'MB' : 'LP';
+
+        let resultHtml = '<span class="badge badge-info">&#9203; Pendiente</span>';
+        if (p.result === 'WON') {
+            const ganancia = ((p.stake * p.odds) - p.stake).toFixed(1);
+            resultHtml = `<span class="badge badge-success">&#9989; +Bs${ganancia}</span>`;
+        } else if (p.result === 'LOST') {
+            resultHtml = `<span class="badge badge-danger">&#10060; -Bs${p.stake}</span>`;
+        }
+
+        return `<tr>
+            <td style="font-size:0.75rem;">${date}</td>
+            <td><span style="color:${bkColor};font-weight:700;font-size:0.75rem;">${bkLabel}</span></td>
+            <td style="font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.match || '—'}</td>
+            <td style="font-size:0.8rem;color:var(--text-secondary);">${p.market || '—'}</td>
+            <td style="font-family:var(--font-mono);color:var(--accent-primary);font-weight:700;">${p.odds || '—'}</td>
+            <td style="font-family:var(--font-mono);">Bs ${p.stake || 0}</td>
+            <td>${resultHtml}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary"
+                    onclick="switchSection('performance')"
+                    style="font-size:0.7rem;padding:2px 8px;">
+                    Ver todo
+                </button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// Bookmaker profit chart (replaces old market accuracy chart)
+function renderBookmakerChart(bkStats) {
+    const canvas = document.getElementById('market-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = 280 * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '280px';
+    ctx.scale(dpr, dpr);
+    const w = rect.width;
+    const h = 280;
+    ctx.clearRect(0, 0, w, h);
+
+    const bks = Object.entries(bkStats || {});
+    if (bks.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px Sora';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sin apuestas registradas este mes', w / 2, h / 2);
+        return;
+    }
+
+    const colors = { lasplatas: '#10b981', metabet: '#f59e0b' };
+    const barW = Math.min(120, (w - 100) / bks.length - 30);
+    const maxProfit = Math.max(...bks.map(([, s]) => Math.abs(s.profit || 0)), 1);
+    const chartH = h - 100;
+    const centerY = h / 2;
+    const startX = (w - bks.length * (barW + 30)) / 2;
+
+    // Center line (zero line)
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(30, centerY);
+    ctx.lineTo(w - 30, centerY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Zero label
+    ctx.fillStyle = '#64748b';
+    ctx.font = '10px "JetBrains Mono"';
+    ctx.textAlign = 'right';
+    ctx.fillText('Bs 0', 28, centerY + 4);
+
+    bks.forEach(([bk, stats], i) => {
+        const x = startX + i * (barW + 30);
+        const profit = stats.profit || 0;
+        const barH = Math.max(4, (Math.abs(profit) / maxProfit) * (chartH / 2 - 20));
+        const color = colors[bk] || '#6366f1';
+
+        const gradient = ctx.createLinearGradient(x, 0, x, h);
+        gradient.addColorStop(0, color + 'dd');
+        gradient.addColorStop(1, color + '44');
+        ctx.fillStyle = gradient;
+
+        if (profit >= 0) {
+            roundedRect(ctx, x, centerY - barH, barW, barH, 6);
+        } else {
+            roundedRect(ctx, x, centerY, barW, barH, 6);
+        }
+        ctx.fill();
+
+        // Profit text
+        ctx.fillStyle = profit >= 0 ? color : '#ef4444';
+        ctx.font = 'bold 13px "JetBrains Mono"';
+        ctx.textAlign = 'center';
+        const profitText = `${profit >= 0 ? '+' : ''}Bs${profit.toFixed(0)}`;
+        ctx.fillText(profitText, x + barW / 2, profit >= 0 ? centerY - barH - 8 : centerY + barH + 18);
+
+        // Bookmaker name
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '11px Sora';
+        ctx.fillText(bk === 'lasplatas' ? 'LasPlatas' : 'Metabet', x + barW / 2, h - 15);
+
+        // W/L stats
+        ctx.font = '10px "JetBrains Mono"';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`${stats.won}W / ${stats.lost}L`, x + barW / 2, h - 30);
+    });
+}
+
+// Accumulated profit chart (replaces old daily accuracy chart)
+function drawProfitChart(profitData) {
+    const canvas = document.getElementById('daily-chart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = 280 * dpr;
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = '280px';
+    ctx.scale(dpr, dpr);
+
+    const w = rect.width;
+    const h = 280;
+    ctx.clearRect(0, 0, w, h);
+
+    if (!profitData || profitData.length === 0) {
+        ctx.fillStyle = '#64748b';
+        ctx.font = '14px Sora';
+        ctx.textAlign = 'center';
+        ctx.fillText('Sin datos de profit — Registra y resuelve picks', w / 2, h / 2);
+        return;
+    }
+
+    const padding = { top: 30, right: 20, bottom: 50, left: 60 };
+    const chartW = w - padding.left - padding.right;
+    const chartH = h - padding.top - padding.bottom;
+
+    const profits = profitData.map(d => d.profit);
+    const maxP = Math.max(...profits, 0);
+    const minP = Math.min(...profits, 0);
+    const range = Math.max(maxP - minP, 1);
+    const yScale = chartH / range;
+
+    // Grid lines
+    const steps = 4;
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 1;
+    ctx.font = '10px "JetBrains Mono"';
+    ctx.textAlign = 'right';
+    for (let i = 0; i <= steps; i++) {
+        const val = maxP - (range / steps) * i;
+        const y = padding.top + (maxP - val) * yScale;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(w - padding.right, y);
+        ctx.stroke();
+        ctx.fillStyle = '#64748b';
+        ctx.fillText(`Bs${val >= 0 ? '+' : ''}${val.toFixed(0)}`, padding.left - 8, y + 4);
+    }
+
+    // Zero line
+    const zeroY = padding.top + maxP * yScale;
+    ctx.strokeStyle = 'rgba(245,158,11,0.4)';
+    ctx.setLineDash([4, 4]);
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(padding.left, zeroY);
+    ctx.lineTo(w - padding.right, zeroY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Data points
+    const points = profitData.map((d, i) => ({
+        x: padding.left + (i / (profitData.length - 1 || 1)) * chartW,
+        y: padding.top + (maxP - d.profit) * yScale,
+        profit: d.profit,
+        date: d.date,
+    }));
+
+    if (points.length > 1) {
+        // Fill area
+        const lastProfit = points[points.length - 1].profit;
+        const fillColor = lastProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+        const lineColor = lastProfit >= 0 ? '#10b981' : '#ef4444';
+
+        const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
+        gradient.addColorStop(0, fillColor);
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, zeroY);
+        points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(points[points.length - 1].x, zeroY);
+        ctx.closePath();
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        for (let i = 1; i < points.length; i++) {
+            const xc = (points[i].x + points[i - 1].x) / 2;
+            const yc = (points[i].y + points[i - 1].y) / 2;
+            ctx.quadraticCurveTo(points[i - 1].x, points[i - 1].y, xc, yc);
+        }
+        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Dots
+        points.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+            ctx.fillStyle = p.profit >= 0 ? '#10b981' : '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#0a0e1a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+    }
+
+    // Date labels
+    const labelStep = Math.max(1, Math.floor(points.length / 8));
+    points.forEach((p, i) => {
+        if (i % labelStep === 0 || i === points.length - 1) {
+            ctx.fillStyle = '#64748b';
+            ctx.font = '9px "JetBrains Mono"';
+            ctx.textAlign = 'center';
+            const dateStr = p.date ? p.date.split('-').slice(1).join('/') : '';
+            ctx.fillText(dateStr, p.x, h - padding.bottom + 18);
+        }
+    });
+}
+
+// Keep old functions as no-ops for backward compatibility
+function drawMarketChart() {}
+function drawDailyChart() {}
 
 // Helper para obtener YYYY-MM-DD en la zona local del usuario
 function getLocalDateString(dateObj = new Date()) {
@@ -562,13 +920,13 @@ async function loadLiveScoreboard(options = {}) {
         clearLiveClockTicker();
         grid.innerHTML = `
             <div class="empty-state glass-card">
-                <span style="font-size:3rem;">📭</span>
+                <span style="font-size:3rem;">&#128237;</span>
                 <p>No hay partidos para <strong>${displayDate}</strong> en esta liga</p>
                 <p style="opacity:0.6;">Prueba con otra fecha o liga</p>
                 <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-                    <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(-1)">◀ Día Anterior</button>
-                    <button class="btn btn-sm btn-accent" onclick="setScoreboardToday()">📅 Hoy</button>
-                    <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(1)">Día Siguiente ▶</button>
+                    <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(-1)">&#9664; Día Anterior</button>
+                    <button class="btn btn-sm btn-accent" onclick="setScoreboardToday()">&#128197; Hoy</button>
+                    <button class="btn btn-sm btn-secondary" onclick="changeScoreboardDate(1)">Día Siguiente &#9654;</button>
                 </div>
             </div>`;
         if (manageAutoRefresh) {
@@ -816,15 +1174,17 @@ function renderLiveMatchCard(match) {
     const safeEventId = Number(match.event_id || match.id);
 
     const matchCenterButton = isSofascore && Number.isFinite(safeEventId)
-        ? `<button class="btn btn-sm btn-primary" onclick="openSofascoreMatchCenter(${safeEventId})">âš½ Match Center</button>`
+        ? `<button class="btn btn-sm btn-primary" onclick="openSofascoreMatchCenter(${safeEventId})">&#9917; Match Center</button>`
         : '';
 
     const roundLabel = match.round ? `<span class="live-meta-pill">${escapeHtml(String(match.round))}</span>` : '';
     const venueLabel = match.venue ? `<span class="live-meta-pill">${escapeHtml(String(match.venue))}</span>` : '';
     const lineupLabel = lineupTag ? `<span class="lineup-tag ${lineupTag.className}">${escapeHtml(lineupTag.label)}</span>` : '';
 
-    const deepAnalysisButton = isSofascore && Number.isFinite(safeEventId)
-        ? `<button class="btn btn-sm" style="background:linear-gradient(135deg, #f59e0b, #ef4444); color:white; border:none;" onclick="getDeepAnalysis(${safeEventId}, decodeURIComponent(this.dataset.home), decodeURIComponent(this.dataset.away))" data-home="${safeHomeName}" data-away="${safeAwayName}">🔥 Analizar Top</button>`
+    const deepAnalysisButton = Number.isFinite(safeEventId)
+        && Number.isFinite(Number(home.id)) && Number.isFinite(Number(away.id))
+        && Number(home.id) > 0 && Number(away.id) > 0
+        ? `<button class="btn btn-sm" style="background:linear-gradient(135deg, #f59e0b, #ef4444); color:white; border:none;" onclick="getDeepAnalysis(${safeEventId}, ${Number(home.id)}, ${Number(away.id)}, decodeURIComponent(this.dataset.home), decodeURIComponent(this.dataset.away))" data-home="${safeHomeName}" data-away="${safeAwayName}">&#128293; Analizar Top</button>`
         : '';
 
     return `
@@ -919,7 +1279,7 @@ function renderLiveMatchesFromState() {
     let headerHtml = `
         <div class="live-date-header glass-card">
             <div class="live-date-main">
-                <span class="live-date-icon">📅</span>
+                <span class="live-date-icon">&#128197;</span>
                 <div>
                     <div class="live-date-title">${escapeHtml(displayDate)}</div>
                     <div class="live-date-subtitle">${filteredMatches.length} partido(s) mostrado(s)</div>
@@ -944,7 +1304,7 @@ function renderLiveMatchesFromState() {
     Object.keys(matchesByLeague).forEach((leagueName) => {
         html += `
             <div class="live-league-divider">
-                <h3>🏆 ${escapeHtml(leagueName)}</h3>
+                <h3>&#127942; ${escapeHtml(leagueName)}</h3>
                 <span>${matchesByLeague[leagueName].length} partidos</span>
             </div>
         `;
@@ -1107,12 +1467,12 @@ function formatCountdownMinutes(countdownMinutes) {
 
 function getIncidentIcon(type) {
     const incidentType = String(type || '').toLowerCase();
-    if (incidentType.includes('goal')) return 'âš½';
+    if (incidentType.includes('goal')) return '&#9917;';
     if (incidentType.includes('yellow')) return '🟨';
     if (incidentType.includes('red')) return '🟥';
     if (incidentType.includes('card')) return '🟨';
-    if (incidentType.includes('substitution')) return '🔄';
-    if (incidentType.includes('penalty')) return '🎯';
+    if (incidentType.includes('substitution')) return '&#128259;';
+    if (incidentType.includes('penalty')) return '&#127919;';
     if (incidentType.includes('var')) return '📺';
     if (incidentType.includes('period')) return '⏱';
     if (incidentType.includes('injury')) return '+';
@@ -2377,7 +2737,7 @@ async function discoverPatternsLegacy() {
     if (!data || !data.patterns || data.patterns.length === 0) {
         grid.innerHTML = `
             <div class="empty-state glass-card">
-                <span style="font-size:3rem;">📊</span>
+                <span style="font-size:3rem;">&#128202;</span>
                 <p>No se encontraron patrones con suficiente confianza</p>
                 <p style="opacity:0.6;">Se necesitan más datos históricos. Ejecuta el pipeline o recopila partidos reales.</p>
             </div>`;
@@ -2386,11 +2746,11 @@ async function discoverPatternsLegacy() {
     }
 
     appState.patterns = data.patterns;
-    showToast(`✅ ${data.patterns_found} patrones descubiertos!`, 'success');
+    showToast(`&#9989; ${data.patterns_found} patrones descubiertos!`, 'success');
 
     const categoryEmojis = {
-        form: '📈', statistical: '📊', h2h: '🤝', league: '🏆',
-        scoring: '⚽', team_statistical: '📋', situational: '🎲'
+        form: '&#128200;', statistical: '&#128202;', h2h: '🤝', league: '&#127942;',
+        scoring: '&#9917;', team_statistical: '📋', situational: '🎲'
     };
 
     const categoryNames = {
@@ -2430,7 +2790,7 @@ async function discoverPatternsLegacy() {
                     </div>
                 </div>
                 <div class="pattern-prediction">
-                    🎯 <strong>${p.prediction?.expected || '—'}</strong>
+                    &#127919; <strong>${p.prediction?.expected || '—'}</strong>
                     <span style="opacity:0.6;">| ${p.prediction?.market || '—'}</span>
                 </div>
             </div>
@@ -2463,11 +2823,11 @@ async function loadNews() {
 
         return `
             <div class="news-card glass-card">
-                <div class="news-type">${article.type === 'HeadlineNews' ? '🔥' : '📰'} ${article.type || 'Story'}</div>
+                <div class="news-type">${article.type === 'HeadlineNews' ? '&#128293;' : '📰'} ${article.type || 'Story'}</div>
                 <h4 class="news-headline">${article.headline || ''}</h4>
                 <p class="news-description">${article.description || ''}</p>
                 <div class="news-footer">
-                    <span class="news-date">📅 ${date}</span>
+                    <span class="news-date">&#128197; ${date}</span>
                     ${categories}
                     ${article.link ? `<a href="${article.link}" target="_blank" class="news-link">Leer más →</a>` : ''}
                 </div>
@@ -2500,7 +2860,7 @@ async function searchInjuriesFor(teamName) {
     if (!data || !data.injuries || data.injuries.length === 0) {
         injList.innerHTML = `
             <div class="empty-state glass-card">
-                <span style="font-size:2rem;">✅</span>
+                <span style="font-size:2rem;">&#9989;</span>
                 <p>No se encontraron lesiones para <strong>${teamName}</strong></p>
                 <p style="opacity:0.6;">El equipo parece estar completo o no hay datos disponibles</p>
             </div>`;
@@ -2523,7 +2883,7 @@ async function searchInjuriesFor(teamName) {
                         <span>🤕 ${inj.injury_type || 'Lesión'}</span>
                         <span>📋 ${inj.status || 'Unknown'}</span>
                         ${inj.details ? `<span>ℹ️ ${inj.details}</span>` : ''}
-                        ${inj.return_date ? `<span>📅 Retorno: ${inj.return_date}</span>` : ''}
+                        ${inj.return_date ? `<span>&#128197; Retorno: ${inj.return_date}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -2606,7 +2966,7 @@ async function getMatchContext(homeTeam, awayTeam) {
 
                 ${stats ? `
                 <div class="context-section">
-                    <h3>📊 Estadísticas Detalladas (Promedios Recientes)</h3>
+                    <h3>&#128202; Estadísticas Detalladas (Promedios Recientes)</h3>
                     <div class="context-grid" style="grid-template-columns: 1fr 1fr;">
                         <div class="context-stat" style="align-items: flex-start; padding: 1rem;">
                             <h4 style="color: var(--text-primary); margin-bottom: 0.5rem;">${homeTeam}</h4>
@@ -2681,13 +3041,13 @@ async function testTelegramLegacy() {
     const statusEl = document.getElementById('telegram-status');
 
     if (data && data.success) {
-        statusEl.textContent = '✅ Conectado!';
+        statusEl.textContent = '&#9989; Conectado!';
         statusEl.style.color = '#10b981';
-        showToast('✅ Telegram conectado! Revisa tu chat.', 'success');
+        showToast('&#9989; Telegram conectado! Revisa tu chat.', 'success');
     } else {
-        statusEl.textContent = '❌ Error';
+        statusEl.textContent = '&#10060; Error';
         statusEl.style.color = '#ef4444';
-        showToast('❌ Error: ' + (data?.message || 'Configura el token y chat ID'), 'error');
+        showToast('&#10060; Error: ' + (data?.message || 'Configura el token y chat ID'), 'error');
     }
 }
 
@@ -2696,202 +3056,26 @@ async function sendValueBetsTelegram() {
     const data = await apiCall('/telegram/notify-value-bets', 'POST');
 
     if (data) {
-        showToast(`✅ ${data.sent || 0} alertas enviadas por Telegram`, 'success');
+        showToast(`&#9989; ${data.sent || 0} alertas enviadas por Telegram`, 'success');
     } else {
-        showToast('❌ Error al enviar', 'error');
+        showToast('&#10060; Error al enviar', 'error');
     }
 }
 
 async function sendDailyReportLegacy() {
-    showToast('📊 Enviando reporte diario...', 'info');
+    showToast('&#128202; Enviando reporte diario...', 'info');
     const data = await apiCall('/telegram/daily-report', 'POST');
 
     if (data && data.sent) {
-        showToast('✅ Reporte enviado por Telegram', 'success');
+        showToast('&#9989; Reporte enviado por Telegram', 'success');
     } else {
-        showToast('❌ Error al enviar reporte', 'error');
+        showToast('&#10060; Error al enviar reporte', 'error');
     }
 }
 
 // ==================== CHARTS (Canvas) ====================
-function drawMarketChart(markets) {
-    const canvas = document.getElementById('market-chart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = 280 * dpr;
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = '280px';
-    ctx.scale(dpr, dpr);
-
-    const w = rect.width;
-    const h = 280;
-    ctx.clearRect(0, 0, w, h);
-
-    if (!markets || markets.length === 0) {
-        ctx.fillStyle = '#64748b';
-        ctx.font = '14px Sora';
-        ctx.textAlign = 'center';
-        ctx.fillText('Sin datos disponibles — Ejecuta el pipeline real', w / 2, h / 2);
-        return;
-    }
-
-    const marketNames = {
-        'match_result': '1X2', 'over_under_25': 'O/U 2.5', 'btts': 'BTTS',
-        'corners': 'Corners', 'cards': 'Cards', 'shots': 'Shots'
-    };
-
-    const barWidth = Math.min(80, (w - 100) / markets.length - 20);
-    const maxVal = 100;
-    const chartH = h - 80;
-    const startX = (w - (markets.length * (barWidth + 20))) / 2;
-
-    markets.forEach((market, i) => {
-        const x = startX + i * (barWidth + 20);
-        const accuracy = market.accuracy || 0;
-        const barH = (accuracy / maxVal) * chartH;
-        const y = chartH - barH + 30;
-
-        const gradient = ctx.createLinearGradient(x, y, x, chartH + 30);
-        if (accuracy >= 60) { gradient.addColorStop(0, '#6366f1'); gradient.addColorStop(1, '#8b5cf6'); }
-        else if (accuracy >= 50) { gradient.addColorStop(0, '#f59e0b'); gradient.addColorStop(1, '#d97706'); }
-        else { gradient.addColorStop(0, '#ef4444'); gradient.addColorStop(1, '#dc2626'); }
-
-        ctx.fillStyle = gradient;
-        roundedRect(ctx, x, y, barWidth, barH, 6);
-        ctx.fill();
-
-        ctx.shadowColor = accuracy >= 60 ? 'rgba(99,102,241,0.3)' : 'rgba(245,158,11,0.3)';
-        ctx.shadowBlur = 15;
-        roundedRect(ctx, x, y, barWidth, barH, 6);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-
-        ctx.fillStyle = '#f1f5f9';
-        ctx.font = 'bold 14px "JetBrains Mono"';
-        ctx.textAlign = 'center';
-        ctx.fillText(accuracy + '%', x + barWidth / 2, y - 8);
-
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '11px Sora';
-        ctx.fillText(marketNames[market.market] || market.market, x + barWidth / 2, chartH + 50);
-
-        ctx.font = '10px "JetBrains Mono"';
-        ctx.fillStyle = '#64748b';
-        ctx.fillText(`${market.wins || 0}W/${market.losses || 0}L`, x + barWidth / 2, chartH + 65);
-    });
-}
-
-function drawDailyChart(dailyData) {
-    const canvas = document.getElementById('daily-chart');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width * dpr;
-    canvas.height = 280 * dpr;
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = '280px';
-    ctx.scale(dpr, dpr);
-
-    const w = rect.width;
-    const h = 280;
-    ctx.clearRect(0, 0, w, h);
-
-    if (!dailyData || dailyData.length === 0) {
-        ctx.fillStyle = '#64748b';
-        ctx.font = '14px Sora';
-        ctx.textAlign = 'center';
-        ctx.fillText('Sin datos diarios — Ejecuta el pipeline real', w / 2, h / 2);
-        return;
-    }
-
-    const padding = { top: 30, right: 20, bottom: 50, left: 50 };
-    const chartW = w - padding.left - padding.right;
-    const chartH = h - padding.top - padding.bottom;
-    const maxAcc = 100;
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= 4; i++) {
-        const y = padding.top + (chartH / 4) * i;
-        ctx.beginPath();
-        ctx.moveTo(padding.left, y);
-        ctx.lineTo(w - padding.right, y);
-        ctx.stroke();
-        ctx.fillStyle = '#64748b';
-        ctx.font = '10px "JetBrains Mono"';
-        ctx.textAlign = 'right';
-        ctx.fillText((100 - i * 25) + '%', padding.left - 8, y + 4);
-    }
-
-    const y50 = padding.top + chartH * 0.5;
-    ctx.strokeStyle = 'rgba(245,158,11,0.3)';
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.moveTo(padding.left, y50);
-    ctx.lineTo(w - padding.right, y50);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    const points = dailyData.map((d, i) => ({
-        x: padding.left + (i / (dailyData.length - 1 || 1)) * chartW,
-        y: padding.top + (1 - (d.accuracy || 0) / maxAcc) * chartH,
-        accuracy: d.accuracy || 0,
-        date: d.date,
-    }));
-
-    if (points.length > 1) {
-        const gradient = ctx.createLinearGradient(0, padding.top, 0, h - padding.bottom);
-        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.15)');
-        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
-
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, h - padding.bottom);
-        points.forEach(p => ctx.lineTo(p.x, p.y));
-        ctx.lineTo(points[points.length - 1].x, h - padding.bottom);
-        ctx.closePath();
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(points[0].x, points[0].y);
-        for (let i = 1; i < points.length; i++) {
-            const xc = (points[i].x + points[i - 1].x) / 2;
-            const yc = (points[i].y + points[i - 1].y) / 2;
-            ctx.quadraticCurveTo(points[i - 1].x, points[i - 1].y, xc, yc);
-        }
-        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y);
-        ctx.strokeStyle = '#6366f1';
-        ctx.lineWidth = 2.5;
-        ctx.stroke();
-
-        points.forEach(p => {
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-            ctx.fillStyle = p.accuracy >= 55 ? '#6366f1' : '#f59e0b';
-            ctx.fill();
-            ctx.strokeStyle = '#0a0e1a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-        });
-    }
-
-    const labelStep = Math.max(1, Math.floor(points.length / 8));
-    points.forEach((p, i) => {
-        if (i % labelStep === 0 || i === points.length - 1) {
-            ctx.fillStyle = '#64748b';
-            ctx.font = '9px "JetBrains Mono"';
-            ctx.textAlign = 'center';
-            const dateStr = p.date ? p.date.split('-').slice(1).join('/') : '';
-            ctx.fillText(dateStr, p.x, h - padding.bottom + 18);
-        }
-    });
-}
+// drawMarketChart and drawDailyChart have been replaced by
+// renderBookmakerChart and drawProfitChart (defined in the DASHBOARD section above).
 
 function roundedRect(ctx, x, y, w, h, r) {
     ctx.beginPath();
@@ -2916,7 +3100,7 @@ async function loadPredictions() {
     const data = await apiCall(url);
     if (!data || !data.predictions) {
         document.getElementById('predictions-grid').innerHTML = `
-            <div class="empty-state"><div class="empty-state-icon">🎯</div>
+            <div class="empty-state"><div class="empty-state-icon">&#127919;</div>
             <div class="empty-state-text">No hay predicciones disponibles</div>
             <div class="empty-state-sub">Entrena los modelos y genera predicciones para próximos partidos</div></div>`;
         return;
@@ -2950,7 +3134,7 @@ function renderPredictionCard(match) {
 
     const marketsHtml = match.markets.map(m => {
         const confClass = m.confidence === 'HIGH' ? 'success' : (m.confidence === 'MEDIUM' ? 'warning' : 'danger');
-        const resultIcon = m.is_correct === 1 ? '✅' : (m.is_correct === 0 ? '❌' : '⏳');
+        const resultIcon = m.is_correct === 1 ? '&#9989;' : (m.is_correct === 0 ? '&#10060;' : '⏳');
         return `
             <div class="market-pred">
                 <span class="market-name">${formatMarketName(m.market)}</span>
@@ -2967,7 +3151,7 @@ function renderPredictionCard(match) {
             <div class="prediction-card-header">
                 <div class="match-info">
                     <div class="match-teams">${match.home_team} <span class="vs">vs</span> ${match.away_team}</div>
-                    <div class="match-meta"><span>📅 ${dateStr}</span><span>🏆 ${match.league}</span></div>
+                    <div class="match-meta"><span>&#128197; ${dateStr}</span><span>&#127942; ${match.league}</span></div>
                 </div>
                 ${statusBadge}
             </div>
@@ -2994,7 +3178,7 @@ async function loadValueBets() {
     container.innerHTML = data.value_bets.map(vb => {
         const edge = (vb.value_edge || 0) * 100;
         const tierClass = edge >= 15 ? 'premium' : (edge >= 10 ? 'strong' : 'normal');
-        const tierLabel = edge >= 15 ? '⚡ PREMIUM' : (edge >= 10 ? '🔥 FUERTE' : '✅ VALUE');
+        const tierLabel = edge >= 15 ? '⚡ PREMIUM' : (edge >= 10 ? '&#128293; FUERTE' : '&#9989; VALUE');
 
         return `
             <div class="value-bet-card glass-card ${tierClass}">
@@ -3002,8 +3186,8 @@ async function loadValueBets() {
                     <div>
                         <div class="vb-match">${vb.home_team_name || 'Local'} vs ${vb.away_team_name || 'Visitante'}</div>
                         <div class="match-meta">
-                            <span>📅 ${vb.match_date ? new Date(vb.match_date).toLocaleDateString('es') : '—'}</span>
-                            <span>🎯 ${formatMarketName(vb.market)}: ${vb.prediction}</span>
+                            <span>&#128197; ${vb.match_date ? new Date(vb.match_date).toLocaleDateString('es') : '—'}</span>
+                            <span>&#127919; ${formatMarketName(vb.market)}: ${vb.prediction}</span>
                         </div>
                     </div>
                     <span class="vb-tier badge badge-premium">${tierLabel}</span>
@@ -3090,7 +3274,7 @@ async function loadModels() {
         return;
     }
 
-    const marketIcons = { 'match_result': '🎯', 'over_under_25': '⚽', 'btts': '🥅', 'corners': '🔄', 'cards': '🟨' };
+    const marketIcons = { 'match_result': '&#127919;', 'over_under_25': '&#9917;', 'btts': '🥅', 'corners': '&#128259;', 'cards': '🟨' };
     const marketColors = {
         'match_result': 'linear-gradient(135deg, #6366f1, #8b5cf6)',
         'over_under_25': 'linear-gradient(135deg, #10b981, #059669)',
@@ -3102,7 +3286,7 @@ async function loadModels() {
     grid.innerHTML = Object.entries(models).map(([market, info]) => `
         <div class="model-card glass-card">
             <div class="model-card-header">
-                <div class="model-icon" style="background: ${marketColors[market] || marketColors.match_result}">${marketIcons[market] || '🤖'}</div>
+                <div class="model-icon" style="background: ${marketColors[market] || marketColors.match_result}">${marketIcons[market] || '&#129302;'}</div>
                 <div><div class="model-name">${formatMarketName(market)}</div><div class="model-type">${info.model_name || 'N/A'}</div></div>
             </div>
             <div class="model-metrics">
@@ -3126,7 +3310,7 @@ async function testTelegram() {
         sts.style.color = '#10b981';
         showToast('Mensaje de prueba enviado por Telegram', 'success');
     } else {
-        sts.textContent = '❌ Error de conexión';
+        sts.textContent = '&#10060; Error de conexión';
         sts.style.color = '#ef4444';
         showToast('Error al enviar test de Telegram. Verifica tu Token y Chat ID.', 'error');
     }
@@ -3171,11 +3355,11 @@ async function loadSettingsFromServer() {
     // Show status indicators
     if (s.FOOTBALL_API_KEY_SET) {
         const el = document.getElementById('status-football-key');
-        if (el) el.textContent = '✅ Configurado';
+        if (el) el.textContent = '&#9989; Configurado';
     }
     if (s.TELEGRAM_BOT_TOKEN_SET) {
         const el = document.getElementById('status-telegram-token');
-        if (el) el.textContent = '✅ Configurado';
+        if (el) el.textContent = '&#9989; Configurado';
     }
 }
 
@@ -3407,7 +3591,7 @@ window.analyzeMultisportMatch = async function(sport, matchId) {
         container.innerHTML = `
             <div style="background:rgba(0,0,0,0.3); padding:0.75rem; border-radius:6px; border-left:3px solid #06b6d4;">
                 <div style="margin-bottom:0.75rem; font-weight:600; color:#a5f3fc; font-size:0.85rem; display:flex; align-items:center;">
-                    <span style="margin-right:0.4rem;">🤖</span> Análisis Tipster Profesional
+                    <span style="margin-right:0.4rem;">&#129302;</span> Análisis Tipster Profesional
                 </div>
                 <div style="display:flex; flex-direction:column; gap:0.6rem;">
                     ${res.predictions.map(p => `
@@ -3461,11 +3645,11 @@ async function loadMultisportNews(sport) {
         return `
             <div class="news-card glass-card">
                 ${imgHtml}
-                <div class="news-type">${article.type === 'HeadlineNews' ? '🔥' : '📰'} ${article.type || 'Story'}</div>
+                <div class="news-type">${article.type === 'HeadlineNews' ? '&#128293;' : '📰'} ${article.type || 'Story'}</div>
                 <h4 class="news-headline">${article.headline || ''}</h4>
                 <p class="news-description">${article.description || ''}</p>
                 <div class="news-footer">
-                    <span class="news-date">📅 ${date}</span>
+                    <span class="news-date">&#128197; ${date}</span>
                     ${article.link ? `<a href="${article.link}" target="_blank" class="news-link">Leer mas</a>` : ''}
                 </div>
             </div>
@@ -3592,36 +3776,22 @@ function showLoading(show) {
     else overlay.classList.remove('active');
 }
 
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-}
-
-// ==================== BANKROLL MANAGER (STUBET - DUAL BOOKMAKER) ====================
-
-const BK_COLORS = {
-    lasplatas: { bg: 'rgba(16,185,129,0.15)', border: '#10b981', text: '#10b981', label: '🟢 LP' },
-    metabet:   { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b', text: '#f59e0b', label: '🟡 MB' }
-};
-
 async function loadBankrollData() {
     try {
-        const filterDate = document.getElementById('filter-pick-date')?.value;
-        let picksUrl = '/picks';
-        if (filterDate) picksUrl += `?date=${filterDate}`;
+        const dateFilter = document.getElementById('filter-pick-date')?.value || '';
+        const bkFilter = document.getElementById('filter-bookmaker')?.value || '';
+        let url = '/api/picks';
+        const params = new URLSearchParams();
+        if (dateFilter) params.append('date', dateFilter);
+        if (bkFilter) params.append('bookmaker', bkFilter);
+        if (params.toString()) url += `?${params.toString()}`;
 
-        // Fetch bankroll and picks in parallel
-        const [bankData, picksData] = await Promise.all([
+        const [bankrollRes, picksRes] = await Promise.all([
             apiCall('/bankroll', 'GET'),
-            apiCall(picksUrl, 'GET')
+            apiCall(url, 'GET')
         ]);
         
-        // Update LasPlatas displays
-        const lpData = bankData?.lasplatas;
+        const lpData = bankrollRes?.lasplatas;
         const lpVal = lpData && lpData.starting > 0 ? `Bs ${lpData.current.toFixed(2)}` : 'Por fijar';
         const lpDiff = lpData && lpData.starting > 0 ? lpData.current - lpData.starting : 0;
         const lpProfitStr = `Bs ${lpDiff >= 0 ? '+' : ''}${lpDiff.toFixed(2)}`;
@@ -3639,8 +3809,7 @@ async function loadBankrollData() {
         setEl('lp-monthly-profit', lpProfitStr, lpDiff >= 0 ? '#10b981' : '#ef4444');
         setEl('header-profit-lp', lpProfitStr, lpDiff >= 0 ? '#10b981' : '#ef4444');
         
-        // Update Metabet displays
-        const mbData = bankData?.metabet;
+        const mbData = bankrollRes?.metabet;
         const mbVal = mbData && mbData.starting > 0 ? `Bs ${mbData.current.toFixed(2)}` : 'Por fijar';
         const mbDiff = mbData && mbData.starting > 0 ? mbData.current - mbData.starting : 0;
         const mbProfitStr = `Bs ${mbDiff >= 0 ? '+' : ''}${mbDiff.toFixed(2)}`;
@@ -3650,7 +3819,6 @@ async function loadBankrollData() {
         setEl('mb-monthly-profit', mbProfitStr, mbDiff >= 0 ? '#f59e0b' : '#ef4444');
         setEl('header-profit-mb', mbProfitStr, mbDiff >= 0 ? '#f59e0b' : '#ef4444');
         
-        // Update total profit display (Monthly)
         const totalStarting = (lpData?.starting || 0) + (mbData?.starting || 0);
         const totalCurrent = (lpData?.current || 0) + (mbData?.current || 0);
         const profitEl = document.getElementById('profit-display');
@@ -3660,61 +3828,172 @@ async function loadBankrollData() {
             profitEl.style.color = diff >= 0 ? '#10b981' : '#ef4444';
         }
         
-        renderPicksTable(picksData);
-        renderDailyReport(picksData, filterDate);
+        renderManualPicks(picksRes);
+        renderDailyReport(picksRes, dateFilter);
     } catch (e) {
         console.error("Error loading bankroll", e);
     }
 }
 
+function renderManualPicks(picks) {
+    const tbody = document.getElementById('manual-picks-body');
+    if (!picks || picks.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #64748b;">No hay apuestas en este periodo.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = picks.map(p => {
+        const isParlay = p.bet_type === 'parlay';
+        const dateObj = new Date(p.date + 'Z');
+        const formattedDate = dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) + ' ' + 
+                              dateObj.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        
+        let resultLabel = '';
+        if (p.result === 'PENDING') resultLabel = '<span style="color:#fbbf24; background:rgba(251,191,36,0.1); padding:2px 6px; border-radius:4px;">PENDIENTE</span>';
+        else if (p.result === 'WON') resultLabel = '<span style="color:#10b981; background:rgba(16,185,129,0.1); padding:2px 6px; border-radius:4px;">GANADA</span>';
+        else if (p.result === 'LOST') resultLabel = '<span style="color:#ef4444; background:rgba(239,68,68,0.1); padding:2px 6px; border-radius:4px;">PERDIDA</span>';
+        else if (p.result === 'VOID') resultLabel = '<span style="color:#94a3b8; background:rgba(148,163,184,0.1); padding:2px 6px; border-radius:4px;">ANULADA</span>';
+        else if (p.result === 'CASHOUT') resultLabel = '<span style="color:#3b82f6; background:rgba(59,130,246,0.1); padding:2px 6px; border-radius:4px;">CASH OUT</span>';
+        else if (p.result === 'HALF_WON') resultLabel = '<span style="color:#34d399; background:rgba(52,211,153,0.1); padding:2px 6px; border-radius:4px;">1/2 GANA</span>';
+        else if (p.result === 'HALF_LOST') resultLabel = '<span style="color:#f87171; background:rgba(248,113,113,0.1); padding:2px 6px; border-radius:4px;">1/2 PIERDE</span>';
+
+        const bkIcon = p.bookmaker === 'metabet' ? '🟡' : '🟢';
+        const actions = getSettleActionContent(p);
+
+        return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                <td style="font-size:0.8rem; color:#94a3b8;">${formattedDate}</td>
+                <td style="font-size:0.9rem;">${bkIcon}</td>
+                <td style="font-size:0.9rem; font-weight:500;">
+                    ${p.match}
+                    ${p.is_draw_no_bet ? '<span style="font-size:0.7rem; color:#f59e0b; margin-left:4px;">(DNB)</span>' : ''}
+                </td>
+                <td style="font-size:0.85rem; color:#cbd5e1; max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${p.market}">${p.market}</td>
+                <td style="font-weight:700; color:#f59e0b;">@${p.odds.toFixed(2)}</td>
+                <td style="font-weight:500;">Bs ${p.stake.toFixed(2)}</td>
+                <td>${resultLabel} ${p.profit ? `<br><small style="color:${p.profit>0?'#10b981':'#ef4444'}">${p.profit>0?'+':''}Bs ${p.profit.toFixed(2)}</small>` : ''}</td>
+                <td>
+                    <div style="display:flex; flex-direction:column; gap:4px;">
+                        ${actions}
+                    </div>
+                </td>
+            </tr>
+            ${isParlay && p.result === 'PENDING' ? `<tr><td colspan="8" style="padding:0; border:0;"><div id="parlay-legs-${p.id}" style="display:none; background:rgba(0,0,0,0.2); padding:10px; margin:0 20px 10px 20px; border-radius:8px; border-left:2px solid #3b82f6;"></div></td></tr>` : ''}
+        `;
+    }).join('');
+}
+
+function getSettleActionContent(p) {
+    if (p.result !== 'PENDING') {
+        return `<button onclick="deletePick(${p.id})" style="background:none; border:none; color:#ef4444; cursor:pointer;" title="Eliminar">🗑️</button>`;
+    }
+
+    if (p.bet_type === 'parlay') {
+        return `
+            <div style="display:flex; gap:4px;">
+                <button class="btn btn-primary btn-sm" onclick="toggleParlayLegs(${p.id})">👁️ Patas</button>
+                <button class="btn btn-secondary btn-sm" onclick="deletePick(${p.id})" title="Eliminar">🗑️</button>
+            </div>
+            <div style="display:flex; gap:4px; margin-top:4px;">
+                <input type="number" id="co-${p.id}" style="width:50px; font-size:10px; padding:2px;" placeholder="CO Bs">
+                <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; background:#3b82f6; border:none;" onclick="settlePick(${p.id}, 'CASHOUT')">Cobrar</button>
+            </div>
+        `;
+    }
+
+    return `
+        <div style="display:flex; gap:4px; justify-content:flex-start;">
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; background:rgba(16,185,129,0.2); color:#10b981; border:1px solid #10b981;" onclick="settlePick(${p.id}, 'WON')">✅</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid #ef4444;" onclick="settlePick(${p.id}, 'LOST')">❌</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; background:rgba(148,163,184,0.2); color:#94a3b8; border:1px solid #94a3b8;" onclick="settlePick(${p.id}, 'VOID')" title="Anulada/VOID">🔄</button>
+            <button onclick="editPick(${p.id})" style="background:none; border:none; color:#3b82f6; cursor:pointer; font-size:12px;" title="Editar">✏️</button>
+            <button onclick="deletePick(${p.id})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px;" title="Eliminar">🗑️</button>
+        </div>
+        <div style="display:flex; gap:4px; margin-top:4px;">
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; color:#34d399;" onclick="settlePick(${p.id}, 'HALF_WON')" title="Medio Gana">½ G</button>
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; color:#f87171;" onclick="settlePick(${p.id}, 'HALF_LOST')" title="Medio Pierde">½ P</button>
+            <input type="number" id="co-${p.id}" style="width:50px; font-size:10px; padding:2px;" placeholder="CO Bs">
+            <button class="btn btn-secondary btn-sm" style="font-size:10px; padding:2px 4px; background:#3b82f6; border:none;" onclick="settlePick(${p.id}, 'CASHOUT')">CO</button>
+        </div>
+    `;
+}
+
+async function settlePick(id, result) {
+    let payload = { result: result };
+    if (result === 'CASHOUT') {
+        const amt = parseFloat(document.getElementById(`co-${id}`)?.value);
+        if (isNaN(amt)) {
+            showToast("Ingresa el monto de Cash Out", "error");
+            return;
+        }
+        payload.cashout_amount = amt;
+    } else {
+        if (!confirm(`¿Estás seguro de marcar esta apuesta como ${result}?`)) return;
+    }
+
+    const res = await apiCall(`/picks/${id}/settle`, 'POST', payload);
+    if (res && res.status === 'success') {
+        showToast("Apuesta liquidada correctamente", "success");
+        loadBankrollData();
+    }
+}
+
+async function toggleParlayLegs(pickId) {
+    const div = document.getElementById(`parlay-legs-${pickId}`);
+    if (div.style.display === 'block') {
+        div.style.display = 'none';
+        return;
+    }
+    
+    div.innerHTML = '<div style="color:#94a3b8; font-size:12px;">Cargando...</div>';
+    div.style.display = 'block';
+    
+    const res = await apiCall(`/picks/${pickId}/legs`, 'GET');
+    if (res && res.legs) {
+        div.innerHTML = res.legs.map(leg => {
+            let resLabel = '';
+            if (leg.result === 'PENDING') resLabel = `
+                <button onclick="settleParlayLeg(${leg.id}, 'WON')" style="background:#10b981; border:none; border-radius:3px; padding:2px 5px; color:white; font-size:10px; cursor:pointer;">✅</button>
+                <button onclick="settleParlayLeg(${leg.id}, 'LOST')" style="background:#ef4444; border:none; border-radius:3px; padding:2px 5px; color:white; font-size:10px; cursor:pointer;">❌</button>
+                <button onclick="settleParlayLeg(${leg.id}, 'VOID')" style="background:#64748b; border:none; border-radius:3px; padding:2px 5px; color:white; font-size:10px; cursor:pointer;">🔄</button>
+                <button onclick="settleParlayLeg(${leg.id}, 'HALF_WON')" style="background:#34d399; border:none; border-radius:3px; padding:2px 5px; color:white; font-size:10px; cursor:pointer;">½G</button>
+                <button onclick="settleParlayLeg(${leg.id}, 'HALF_LOST')" style="background:#f87171; border:none; border-radius:3px; padding:2px 5px; color:white; font-size:10px; cursor:pointer;">½P</button>
+            `;
+            else resLabel = `<span style="font-size:10px; font-weight:bold; color:${leg.result==='WON'?'#10b981':(leg.result==='LOST'?'#ef4444':'#94a3b8')}">${leg.result}</span>`;
+            
+            return `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                <span style="font-size:11px;">
+                    <b>${leg.match_name}</b> ${leg.is_draw_no_bet?'(DNB)':''} <br>
+                    <span style="color:#a5f3fc;">${leg.market}</span> <span style="color:#f59e0b;">@${leg.odds}</span>
+                </span>
+                <div style="display:flex; gap:4px;">${resLabel}</div>
+            </div>
+            `;
+        }).join('');
+    } else {
+        div.innerHTML = '<div style="color:#ef4444; font-size:12px;">Error al cargar patas</div>';
+    }
+}
+
+async function settleParlayLeg(legId, result) {
+    if (!confirm(`¿Marcar esta pata como ${result}?`)) return;
+    const res = await apiCall(`/picks/parlay/leg/${legId}/settle`, 'POST', { result: result });
+    if (res && res.status === 'success') {
+        showToast("Pata resuelta", "success");
+        loadBankrollData();
+    }
+}
+
+const BK_COLORS = {
+    lasplatas: { bg: 'rgba(16,185,129,0.15)', border: '#10b981', text: '#10b981', label: '🟢 LP' },
+    metabet:   { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b', text: '#f59e0b', label: '🟡 MB' }
+};
+
 function resetPickFilter() {
     const filterInput = document.getElementById('filter-pick-date');
     if (filterInput) filterInput.value = '';
     loadBankrollData();
-}
-
-function renderPicksTable(picks) {
-    const tbody = document.getElementById('manual-picks-body');
-    if (!tbody) return;
-    
-    if (picks && picks.length > 0) {
-        tbody.innerHTML = '';
-        picks.forEach(p => {
-            const tr = document.createElement('tr');
-            const isWon = p.result === 'WON';
-            const isLost = p.result === 'LOST';
-            const statusBadge = isWon ? '<span style="color:#10b981; font-weight:700;">✅ GANADA</span>' : 
-                              (isLost ? '<span style="color:#ef4444; font-weight:700;">❌ PERDIDA</span>' : '<span style="color:#f59e0b; font-weight:700;">⏳ PENDIENTE</span>');
-            
-            const bk = p.bookmaker || 'lasplatas';
-            const bkStyle = BK_COLORS[bk] || BK_COLORS.lasplatas;
-            const bkBadge = `<span style="background:${bkStyle.bg}; color:${bkStyle.text}; border:1px solid ${bkStyle.border}; border-radius:4px; padding:2px 6px; font-size:0.75rem; font-weight:600;">${bkStyle.label}</span>`;
-            
-            let actionsHtml = `<div class="action-buttons">`;
-            if (!isWon && !isLost) {
-                actionsHtml += `
-                    <button onclick="settlePick(${p.id}, 'WON')" class="action-btn win" title="Marcar Ganada">✅</button>
-                    <button onclick="settlePick(${p.id}, 'LOST')" class="action-btn loss" title="Marcar Perdida">❌</button>
-                    <button onclick="openEditModal(${p.id})" class="action-btn edit" title="Editar datos">✏️</button>
-                `;
-            }
-            actionsHtml += `<button onclick="deletePick(${p.id})" class="action-btn delete" title="Eliminar apuesta">🗑️</button></div>`;
-            
-            tr.innerHTML = `
-                <td style="font-size:0.75rem; color:var(--text-secondary);">${new Date(p.date).toLocaleString('es', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</td>
-                <td>${bkBadge}</td>
-                <td style="font-weight:600;">${p.match} ${p.ticket_id ? `<span style="font-size:0.65rem; color:var(--accent-secondary); border:1px solid var(--accent-secondary); border-radius:3px; padding:0px 4px; margin-left:4px;">🎫 ${p.ticket_id}</span>` : ''}</td>
-                <td style="color:var(--text-secondary); font-size:0.8rem;">${p.market}</td>
-                <td style="font-family:var(--font-mono); font-weight:700; color:var(--accent-primary);">${p.odds}</td>
-                <td style="font-family:var(--font-mono); font-weight:700;">Bs ${p.stake}</td>
-                <td>${statusBadge}</td>
-                <td>${actionsHtml}</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } else {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 2rem;">No hay apuestas registradas para este filtro.</td></tr>';
-    }
 }
 
 function renderDailyReport(picks, filterDate) {
@@ -3757,13 +4036,11 @@ function renderDailyReport(picks, filterDate) {
         }
     };
 
-    // Update LasPlatas UI
     setVal('lp-daily-invested', `Bs ${stats.lasplatas.invested.toFixed(0)}`);
     setVal('lp-daily-wl', `${stats.lasplatas.wins}-${stats.lasplatas.losses}`);
     setVal('lp-daily-net', `Bs ${stats.lasplatas.profit >= 0 ? '+' : ''}${stats.lasplatas.profit.toFixed(0)}`, 
            stats.lasplatas.profit >= 0 ? '#10b981' : '#ef4444');
 
-    // Update Metabet UI
     setVal('mb-daily-invested', `Bs ${stats.metabet.invested.toFixed(0)}`);
     setVal('mb-daily-wl', `${stats.metabet.wins}-${stats.metabet.losses}`);
     setVal('mb-daily-net', `Bs ${stats.metabet.profit >= 0 ? '+' : ''}${stats.metabet.profit.toFixed(0)}`, 
@@ -3781,55 +4058,127 @@ function renderDailyReport(picks, filterDate) {
     }
 }
 
+async function addManualPick() {
+    const match = document.getElementById('manual-match').value.trim();
+    const market = document.getElementById('manual-market').value.trim();
+    const odds = parseFloat(document.getElementById('manual-odds').value);
+    const stake = parseFloat(document.getElementById('manual-stake').value);
+    const dateStr = document.getElementById('manual-placed-at').value;
+    const bookmaker = document.getElementById('manual-bookmaker').value;
+    const isDNB = document.getElementById('manual-dnb').checked;
 
-async function setInitialBankroll(bookmaker) {
-    const inputId = bookmaker === 'metabet' ? 'bankroll-input-mb' : 'bankroll-input-lp';
-    const val = document.getElementById(inputId).value;
-    if (!val || parseFloat(val) <= 0) {
-        showToast("Ingresa un monto válido", "error");
-        return;
-    }
-    const res = await apiCall('/bankroll', 'POST', { amount: parseFloat(val), bookmaker: bookmaker });
-    if (res && res.status === 'success') {
-        const label = bookmaker === 'metabet' ? 'Metabet' : 'LasPlatas';
-        showToast(`Bankroll de ${label} fijado: Bs ${val}`, "success");
-        document.getElementById(inputId).value = '';
-        loadBankrollData();
-    }
-}
-
-async function addManualPick(ticketId = null, mMatch = null, mMarket = null, mOdds = null, mStake = null, mBookmaker = null) {
-    const bookmaker = mBookmaker || document.getElementById('manual-bookmaker').value;
-    const match = mMatch || document.getElementById('manual-match').value;
-    const market = mMarket || document.getElementById('manual-market').value;
-    const odds = mOdds || parseFloat(document.getElementById('manual-odds').value);
-    const stake = mStake || parseFloat(document.getElementById('manual-stake').value);
-    
-    let placed_at = null;
-    const dateInput = document.getElementById('manual-placed-at');
-    if (dateInput && dateInput.value) {
-        placed_at = dateInput.value.replace('T', ' ') + ':00';
-    }
-    
     if (!match || !market || !odds || !stake) {
-        showToast("Llena todos los campos", "error");
+        showToast("Por favor llena partido, mercado, cuota e inversión", "error");
         return;
     }
+
+    const payload = {
+        match: match,
+        market: market,
+        odds: odds,
+        stake: stake,
+        bookmaker: bookmaker,
+        bet_type: 'single',
+        is_draw_no_bet: isDNB
+    };
     
-    const res = await apiCall('/picks', 'POST', {
-        match, market, odds, stake, ticket_id: ticketId, bookmaker, placed_at
-    });
+    const res = await apiCall('/picks', 'POST', payload);
     
     if (res && res.status === 'success') {
         const label = bookmaker === 'metabet' ? 'Metabet' : 'LasPlatas';
-        showToast(`Pick registrado en ${label}. Inversión descontada.`, "success");
+        showToast(`Pick registrado en ${label}.`, "success");
         document.getElementById('manual-match').value = '';
         document.getElementById('manual-market').value = '';
         document.getElementById('manual-odds').value = '';
         document.getElementById('manual-stake').value = '';
-        if (dateInput) dateInput.value = '';
         loadBankrollData();
     }
+}
+
+async function addCombiLeg() {
+    const match = document.getElementById('combi-match').value.trim();
+    const market = document.getElementById('combi-market').value.trim();
+    const odds = parseFloat(document.getElementById('combi-leg-odds').value);
+    const isDNB = document.getElementById('combi-dnb').checked;
+
+    if (!match || !market || !odds || odds <= 1) {
+        showToast("Llena partido, mercado y cuota (>1.00)", "error");
+        return;
+    }
+
+    combiLegs.push({ match_name: match, market, odds, is_draw_no_bet: isDNB });
+    document.getElementById('combi-match').value = '';
+    document.getElementById('combi-market').value = '';
+    document.getElementById('combi-leg-odds').value = '';
+    document.getElementById('combi-dnb').checked = false;
+    renderCombiLegs();
+    showToast(`Selección agregada: ${match} — ${market} @${odds}`, "success");
+}
+
+function renderCombiLegs() {
+    const container = document.getElementById('combi-legs-list');
+    const oddsDisplay = document.getElementById('combi-odds-value');
+    const countDisplay = document.getElementById('combi-legs-count');
+
+    if (combiLegs.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 12px; color: #64748b; font-size: 0.85rem; border: 1px dashed #334155; border-radius: 8px;">Agrega selecciones con el botón ➕ de arriba</div>';
+        oddsDisplay.textContent = '—';
+        countDisplay.textContent = '0 selecciones';
+        return;
+    }
+
+    const combinedOdds = combiLegs.reduce((acc, leg) => acc * leg.odds, 1);
+    oddsDisplay.textContent = `@${combinedOdds.toFixed(4)}`;
+    countDisplay.textContent = `${combiLegs.length} seleccion${combiLegs.length > 1 ? 'es' : ''}`;
+
+    container.innerHTML = combiLegs.map((leg, i) => `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 4px; border-left: 3px solid ${i === 0 ? '#10b981' : (i === 1 ? '#3b82f6' : '#f59e0b')};">
+            <span style="font-weight: 700; color: #94a3b8; font-size: 0.8rem; min-width: 20px;">#${i + 1}</span>
+            <span style="flex: 2; font-weight: 500; font-size: 0.85rem;">${leg.match_name} ${leg.is_draw_no_bet ? '<span style="color:#f59e0b;font-size:0.7rem;">(DNB)</span>' : ''}</span>
+            <span style="flex: 1; color: #a5f3fc; font-size: 0.85rem;">${leg.market}</span>
+            <span style="font-weight: 700; color: #f59e0b; min-width: 60px; text-align: right;">@${leg.odds.toFixed(2)}</span>
+            <button onclick="removeCombiLeg(${i})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:2px 6px;" title="Quitar">✕</button>
+        </div>
+    `).join('');
+}
+
+function clearCombiLegs() {
+    combiLegs = [];
+    renderCombiLegs();
+}
+
+async function saveCombiPick() {
+    if (combiLegs.length < 2) {
+        showToast("Agrega al menos 2 selecciones para una combinada", "error");
+        return;
+    }
+
+    const stake = parseFloat(document.getElementById('combi-stake').value);
+    if (!stake || stake <= 0) {
+        showToast("Ingresa la inversión total", "error");
+        return;
+    }
+
+    const bookmaker = document.getElementById('manual-bookmaker').value;
+
+    const res = await apiCall('/picks/parlay', 'POST', {
+        stake: stake,
+        bookmaker: bookmaker,
+        legs: combiLegs
+    });
+
+    if (res && res.status === 'success') {
+        const label = bookmaker === 'metabet' ? 'Metabet' : 'LasPlatas';
+        showToast(`Combinada de ${combiLegs.length} patas guardada en ${label}`, "success");
+        clearCombiLegs();
+        document.getElementById('combi-stake').value = '';
+        loadBankrollData();
+    }
+}
+
+function removeCombiLeg(index) {
+    combiLegs.splice(index, 1);
+    renderCombiLegs();
 }
 
 async function scanTicket() {
@@ -3850,7 +4199,6 @@ async function scanTicket() {
             const label = bkDetected === 'metabet' ? 'Metabet' : 'LasPlatas';
             
             if (res.note) {
-                // Metabet parcial: auto-llenar formulario para que el usuario corrija
                 showToast(`Datos extraidos de ${label}. Verifica y ajusta.`, "warning");
                 document.getElementById('manual-bookmaker').value = bkDetected;
                 document.getElementById('manual-match').value = res.match || '';
@@ -3860,7 +4208,7 @@ async function scanTicket() {
                 document.getElementById('ticket-id').value = "";
             } else {
                 showToast(`Cupón de ${label} escaneado!`, "success");
-                await addManualPick(ticketId, res.match, res.market, res.odds, res.stake, bkDetected);
+                await addManualPick();
                 document.getElementById('ticket-id').value = "";
             }
         } else {
@@ -3891,34 +4239,50 @@ async function deletePick(pickId) {
 
 async function autoResolvePicks() {
     showLoading(true);
+    const loadingText = document.querySelector('#loading-overlay p');
+    if (loadingText) loadingText.textContent = 
+        'Buscando resultados en SofaScore...';
+    
     try {
         const res = await apiCall('/picks/auto-resolve', 'POST');
         showLoading(false);
+        if (loadingText) loadingText.textContent = 
+            'Procesando datos con IA...';
+        
         if (res && res.status === 'success') {
-            showToast(res.message, "info");
+            let msg = res.message;
+            if (res.details && res.details.length > 0) {
+                const won  = res.details.filter(d => d.result === 'WON').length;
+                const lost = res.details.filter(d => d.result === 'LOST').length;
+                const skip = res.skipped || 0;
+                msg = `✅ ${won} ganadas, ❌ ${lost} perdidas, ⏭️ ${skip} manuales`;
+            }
+            showToast(msg, 'success');
+            
+            const manual = (res.details || [])
+                .filter(d => d.status === 'skipped' && d.score);
+            
+            if (manual.length > 0) {
+                const manualList = manual.map(d => 
+                    `• ${d.pick}: ${d.score} → ${d.reason}`
+                ).join('\n');
+                console.log('[AutoResolve] Resolución manual requerida:\n' 
+                    + manualList);
+                showToast(
+                    `${manual.length} pick(s) necesitan resolución manual`, 
+                    'info'
+                );
+            }
+            
             loadBankrollData();
+            loadDashboard();
         } else {
-            showToast("No se pudieron resolver los picks.", "error");
+            showToast(res?.message || 
+                'Error en auto-resolver', 'error');
         }
     } catch (e) {
         showLoading(false);
-        showToast("Error en la conexión", "error");
-    }
-}
-
-async function settlePick(pickId, result) {
-    if (!confirm(`¿Seguro que deseas marcar esta apuesta como ${result === 'WON' ? 'GANADA' : 'PERDIDA'}?`)) return;
-    
-    try {
-        const res = await apiCall(`/picks/${pickId}/settle`, 'POST', { result });
-        if (res && res.status === 'success') {
-            showToast("Apuesta resuelta correctamente.", "success");
-            loadBankrollData();
-        } else {
-            showToast(res?.message || "No se pudo resolver la apuesta.", "error");
-        }
-    } catch (e) {
-        showToast("Error al resolver la apuesta", "error");
+        showToast('Error de conexión', 'error');
     }
 }
 
@@ -3933,7 +4297,6 @@ async function openEditModal(pickId) {
     document.getElementById('edit-stake').value = pick.stake;
     document.getElementById('edit-bookmaker').value = pick.bookmaker;
     
-    // Convert YYYY-MM-DD HH:MM:SS to YYYY-MM-DDTHH:MM for datetime-local
     if (pick.date) {
         const dt = new Date(pick.date);
         const pad = (n) => n.toString().padStart(2, '0');
@@ -3975,7 +4338,6 @@ async function submitUpdatePick() {
     }
 }
 
-// Auto-detect bookmaker from scanner input
 document.addEventListener('DOMContentLoaded', () => {
     const ticketInput = document.getElementById('ticket-id');
     const scannerSelect = document.getElementById('scanner-bookmaker');
@@ -3990,9 +4352,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
-// ==================== COMBINADA (PARLAY) SYSTEM ====================
-let combiLegs = [];
 
 function setBetType(type) {
     const singleForm = document.getElementById('single-bet-form');
@@ -4017,341 +4376,186 @@ function setBetType(type) {
     }
 }
 
-function addCombiLeg() {
-    const match = document.getElementById('combi-match').value.trim();
-    const market = document.getElementById('combi-market').value.trim();
-    const odds = parseFloat(document.getElementById('combi-leg-odds').value);
-
-    if (!match || !market || !odds || odds <= 1) {
-        showToast("Llena partido, mercado y cuota (>1.00)", "error");
-        return;
-    }
-
-    combiLegs.push({ match, market, odds });
-    document.getElementById('combi-match').value = '';
-    document.getElementById('combi-market').value = '';
-    document.getElementById('combi-leg-odds').value = '';
-    renderCombiLegs();
-    showToast(`Selección agregada: ${match} — ${market} @${odds}`, "success");
-}
-
-function removeCombiLeg(index) {
-    combiLegs.splice(index, 1);
-    renderCombiLegs();
-}
-
-function renderCombiLegs() {
-    const container = document.getElementById('combi-legs-list');
-    const oddsDisplay = document.getElementById('combi-odds-value');
-    const countDisplay = document.getElementById('combi-legs-count');
-
-    if (combiLegs.length === 0) {
-        container.innerHTML = '<div style="text-align: center; padding: 12px; color: #64748b; font-size: 0.85rem; border: 1px dashed #334155; border-radius: 8px;">Agrega selecciones con el botón ➕ de arriba</div>';
-        oddsDisplay.textContent = '—';
-        countDisplay.textContent = '0 selecciones';
-        return;
-    }
-
-    const combinedOdds = combiLegs.reduce((acc, leg) => acc * leg.odds, 1);
-    oddsDisplay.textContent = `@${combinedOdds.toFixed(4)}`;
-    countDisplay.textContent = `${combiLegs.length} seleccion${combiLegs.length > 1 ? 'es' : ''}`;
-
-    container.innerHTML = combiLegs.map((leg, i) => `
-        <div style="display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(255,255,255,0.03); border-radius: 6px; margin-bottom: 4px; border-left: 3px solid ${i === 0 ? '#10b981' : (i === 1 ? '#3b82f6' : '#f59e0b')};">
-            <span style="font-weight: 700; color: #94a3b8; font-size: 0.8rem; min-width: 20px;">#${i + 1}</span>
-            <span style="flex: 2; font-weight: 500; font-size: 0.85rem;">${leg.match}</span>
-            <span style="flex: 1; color: #a5f3fc; font-size: 0.85rem;">${leg.market}</span>
-            <span style="font-weight: 700; color: #f59e0b; min-width: 60px; text-align: right;">@${leg.odds.toFixed(2)}</span>
-            <button onclick="removeCombiLeg(${i})" style="background:none; border:none; color:#ef4444; cursor:pointer; font-size:1rem; padding:2px 6px;" title="Quitar">✕</button>
-        </div>
-    `).join('');
-}
-
-function clearCombiLegs() {
-    combiLegs = [];
-    renderCombiLegs();
-    showToast("Selecciones limpiadas", "info");
-}
-
-async function saveCombiPick() {
-    if (combiLegs.length < 2) {
-        showToast("Agrega al menos 2 selecciones para una combinada", "error");
-        return;
-    }
-
-    const stake = parseFloat(document.getElementById('combi-stake').value);
-    if (!stake || stake <= 0) {
-        showToast("Ingresa la inversión total", "error");
-        return;
-    }
-
-    const bookmaker = document.getElementById('manual-bookmaker').value;
-    const combinedOdds = combiLegs.reduce((acc, leg) => acc * leg.odds, 1);
-
-    // Build descriptive strings
-    const matchStr = combiLegs.map(l => l.match).join(' + ');
-    const marketStr = `🔗 COMBINADA (${combiLegs.length}): ` + combiLegs.map(l => `${l.market} @${l.odds.toFixed(2)}`).join(' | ');
-
-    const res = await apiCall('/picks', 'POST', {
-        match: matchStr,
-        market: marketStr,
-        odds: parseFloat(combinedOdds.toFixed(4)),
-        stake: stake,
-        ticket_id: null,
-        bookmaker: bookmaker
-    });
-
-    if (res && res.status === 'success') {
-        const label = bookmaker === 'metabet' ? 'Metabet' : 'LasPlatas';
-        showToast(`🔗 Combinada de ${combiLegs.length} selecciones guardada en ${label}! Cuota @${combinedOdds.toFixed(2)}`, "success");
-        combiLegs = [];
-        document.getElementById('combi-stake').value = '';
-        renderCombiLegs();
-        loadBankrollData();
-    } else {
-        showToast("Error al guardar la combinada", "error");
-    }
-}
-
 setTimeout(loadBankrollData, 1500);
 
-async function getDeepAnalysis(eventId, homeTeam, awayTeam) {
-    if (!eventId) {
-        showToast('No se encontro el evento de SofaScore', 'error');
+let lastDeepAnalysisData = null;
+
+async function getDeepAnalysis(eventId, homeTeamId, awayTeamId, homeName, awayName) {
+    console.log('[Analizar Top]', { eventId, homeTeamId, awayTeamId, homeName, awayName });
+    
+    if (!eventId || !homeTeamId || !awayTeamId ||
+        homeTeamId === 0 || awayTeamId === 0 ||
+        isNaN(homeTeamId) || isNaN(awayTeamId)) {
+        showToast('IDs de equipo no disponibles para este partido', 'error');
         return;
     }
 
     const loadingText = document.querySelector('#loading-overlay p');
     const originalText = loadingText ? loadingText.textContent : 'Procesando datos con IA...';
-    if (loadingText) loadingText.textContent = 'Analizando ' + homeTeam + ' vs ' + awayTeam + ' - recopilando TODA la data...';
+    if (loadingText) loadingText.textContent = 'Recopilando estadísticas de SofaScore...';
     
     showLoading(true);
     
-    const data = await apiCall(buildSofascoreMatchCenterPath(eventId, { noCache: true, refreshHistoryStats: true, forceFreshHistory: true, includeHistoryStatistics: true }), 'GET', null, { noCache: true });
+    const bodyPayload = {
+        event_id: eventId,
+        home_team_id: homeTeamId,
+        away_team_id: awayTeamId,
+        home_name: homeName,
+        away_name: awayName
+    };
+
+    const data = await apiCall('/analyze/match', 'POST', bodyPayload, { noCache: true });
     
     showLoading(false);
     if (loadingText) loadingText.textContent = originalText;
 
-    if (!data || data.status !== 'success') {
-        showToast('No se pudo cargar la informacion para el analisis', 'error');
+    if (!data || Object.keys(data).length === 0) {
+        showToast('No se pudo recopilar la información', 'error');
         return;
     }
 
-    const evSummary = data.event_summary || {};
-    const homeInfo = evSummary.home_team || {};
-    const awayInfo = evSummary.away_team || {};
-    const homeName = homeInfo.name || homeTeam;
-    const awayName = awayInfo.name || awayTeam;
-    const venueName = typeof evSummary.venue === 'object' ? (evSummary.venue && (evSummary.venue.stadium || evSummary.venue.name) || 'N/A') : (evSummary.venue || 'N/A');
-
-    let md = '';
-    md += 'ANALISIS COMPLETO: ' + homeName + ' vs ' + awayName + '\n';
-    md += 'Liga: ' + (evSummary.tournament || '') + ' | ' + (evSummary.category || '') + '\n';
-    md += 'Ronda: ' + (evSummary.round || '') + ' | Estadio: ' + venueName + '\n';
-    md += 'Estado: ' + (evSummary.status || 'Programado') + '\n\n';
-
-    // 1. ESTADISTICAS DEL PARTIDO ACTUAL (si ya empezo)
-    const statistics = data.statistics || [];
-    if (statistics.length > 0) {
-        md += '=== ESTADISTICAS DEL PARTIDO (COMPLETAS) ===\n';
-        statistics.forEach(function(period) {
-            md += '\nPeriodo: ' + (period.period || 'TODOS') + '\n';
-            (period.groups || []).forEach(function(group) {
-                md += '  -- ' + (group.group_name || 'General') + ' --\n';
-                (group.items || []).forEach(function(item) {
-                    var hv = item.home != null ? item.home : '-';
-                    var av = item.away != null ? item.away : '-';
-                    md += '    ' + item.name + ': ' + homeName + ' ' + hv + ' | ' + awayName + ' ' + av + '\n';
-                });
-            });
-        });
-        md += '\n';
-    }
-
-    // 2. ALINEACIONES Y AUSENCIAS
-    var lineup = data.lineup || {};
-    md += '=== ALINEACIONES (' + (lineup.label || lineup.status || 'N/A') + ') ===\n';
-    
-    function fmtSide(side, teamLabel) {
-        if (!side) return '  ' + teamLabel + ': Sin datos.\n';
-        var t = '  ' + teamLabel + ' - Formacion: ' + (side.formation || 'N/A') + '\n';
-        var starters = side.starters || [];
-        if (starters.length > 0) {
-            t += '  Titulares:\n';
-            starters.forEach(function(p) {
-                var r = p.display_rating ? ' (' + Number(p.display_rating).toFixed(1) + ')' : '';
-                var pos = p.position ? ' [' + p.position + ']' : '';
-                var num = p.shirt_number ? '#' + p.shirt_number + ' ' : '';
-                var cap = p.captain ? ' (C)' : '';
-                t += '    - ' + num + (p.name || p.short_name || '?') + pos + cap + r + '\n';
-            });
-        }
-        var benchP = side.bench || [];
-        if (benchP.length > 0) {
-            t += '  Suplentes: ' + benchP.map(function(p) { return p.name || p.short_name || '?'; }).join(', ') + '\n';
-        }
-        var miss = side.missing || [];
-        if (miss.length > 0) {
-            t += '  AUSENCIAS/LESIONES:\n';
-            miss.forEach(function(p) {
-                var desc = p.description && p.description !== 'No disponible' ? ' (' + p.description + ')' : '';
-                t += '    - ' + (p.name || '?') + ' - ' + (p.status || 'Baja') + (p.injury_type ? ': ' + p.injury_type : '') + desc + '\n';
-            });
-        }
-        return t;
-    }
-    md += fmtSide(lineup.home, homeName);
-    md += fmtSide(lineup.away, awayName);
-    md += '\n';
-
-    // 3. H2H
-    var history = data.history || {};
-    var h2hList = history.h2h || [];
-    if (h2hList.length > 0) {
-        md += '=== HEAD-TO-HEAD (' + h2hList.length + ' enfrentamientos) ===\n';
-        h2hList.forEach(function(m) {
-            var hs = m.home_score != null ? m.home_score : '-';
-            var as2 = m.away_score != null ? m.away_score : '-';
-            md += '  ' + (m.match_date || '?') + ' | ' + (m.home_team_name || '?') + ' ' + hs + ' - ' + as2 + ' ' + (m.away_team_name || '?') + ' (' + (m.league_name || m.tournament_name || '') + ')\n';
-        });
-        md += '\n';
-    }
-
-    // 4. ULTIMOS 10 PARTIDOS
-    function fmtMatches(matches, label) {
-        if (!matches || matches.length === 0) return;
-        md += '=== ULTIMOS ' + matches.length + ' PARTIDOS: ' + label + ' ===\n';
-        matches.forEach(function(m) {
-            var hs = m.home_score != null ? m.home_score : '-';
-            var as2 = m.away_score != null ? m.away_score : '-';
-            md += '  ' + (m.match_date || '?') + ' | ' + (m.home_team_name || '?') + ' ' + hs + ' - ' + as2 + ' ' + (m.away_team_name || '?') + ' (' + (m.league_name || m.tournament_name || '') + ')\n';
-        });
-        md += '\n';
-    }
-    fmtMatches(history.home_last10, homeName);
-    fmtMatches(history.away_last10, awayName);
-
-    // 5. AI CONTEXT - FORM + PERIOD AVERAGES (TODAS las estadisticas)
-    var aiCtx = data.ai_context || {};
-    if (aiCtx.enabled) {
-        md += '=== ESTADISTICAS AGREGADAS (Promedios ultimos partidos) ===\n';
-        
-        function dumpBucket(bkt, label) {
-            if (!bkt || typeof bkt !== 'object') return;
-            var sc = bkt.sample_count || 0;
-            var stc = bkt.stats_available_count || 0;
-            md += '\n  ' + label + ' (' + sc + ' partidos, ' + stc + ' con stats):\n';
-            
-            var f = bkt.form || {};
-            if (f.sample_size) {
-                md += '    Rendimiento: ' + (f.wins || 0) + 'V ' + (f.draws || 0) + 'E ' + (f.losses || 0) + 'D (Win: ' + (f.win_rate || 0) + '%)\n';
-                if (f.goals_for_avg != null) md += '    Goles Favor/P: ' + Number(f.goals_for_avg).toFixed(2) + '\n';
-                if (f.goals_against_avg != null) md += '    Goles Contra/P: ' + Number(f.goals_against_avg).toFixed(2) + '\n';
-                if (f.over25_rate != null) md += '    Over 2.5: ' + f.over25_rate + '%\n';
-                if (f.btts_rate != null) md += '    BTTS (Ambos Marcan): ' + f.btts_rate + '%\n';
-            }
-            
-            var pa = bkt.period_averages || {};
-            var periodKeys = Object.keys(pa);
-            periodKeys.forEach(function(pk) {
-                var pLabel = pk === 'ALL' ? 'Partido Completo' : (pk === '1ST' ? '1er Tiempo' : (pk === '2ND' ? '2do Tiempo' : pk));
-                md += '    [' + pLabel + ']:\n';
-                var metrics = pa[pk] || {};
-                Object.keys(metrics).forEach(function(mk) {
-                    var m = metrics[mk];
-                    var lbl = m.label || mk.replace(/_/g, ' ');
-                    var fA = m.for_avg != null ? Number(m.for_avg).toFixed(2) : '-';
-                    var aA = m.against_avg != null ? Number(m.against_avg).toFixed(2) : '-';
-                    var edge = m.edge != null ? ' (Ventaja: ' + (m.edge > 0 ? '+' : '') + m.edge + ')' : '';
-                    md += '      - ' + lbl + ': Favor ' + fA + ' | Contra ' + aA + edge + '\n';
-                });
-            });
-        }
-        
-        dumpBucket(aiCtx.home_last10, homeName);
-        dumpBucket(aiCtx.away_last10, awayName);
-        dumpBucket(aiCtx.h2h, 'H2H');
-        
-        var notes = aiCtx.analysis_notes || [];
-        if (notes.length > 0) {
-            md += '\n  Notas IA:\n';
-            notes.forEach(function(n) { md += '    > ' + n + '\n'; });
-        }
-        md += '\n';
-    }
-
-    // 6. INCIDENTES
-    var incidents = data.incidents || [];
-    if (incidents.length > 0) {
-        md += '=== INCIDENTES ===\n';
-        incidents.forEach(function(inc) {
-            var min = inc.time ? inc.time + "'" : '-';
-            var side = inc.is_home ? homeName : awayName;
-            md += '  ' + min + ' | ' + side + ' | ' + (inc.incident_type || inc.text || '') + ' ' + (inc.player_name || inc.player || '') + '\n';
-        });
-        md += '\n';
-    }
-
-    md += '==================================================\n';
-    md += 'INSTRUCCION: Analiza TODA esta data como tipster profesional. ';
-    md += 'Dame pronostico con mejores selecciones (1X2, Over/Under, BTTS, ';
-    md += 'Corners, Tarjetas, Handicap). Nivel de confianza y justificacion.';
-
-    var modal = document.createElement('div');
-    modal.className = 'context-modal-overlay';
-    modal.onclick = function(e) { if (e.target === modal) modal.remove(); };
-
-    var modalContent = document.createElement('div');
-    modalContent.className = 'context-modal glass-card';
-    modalContent.style.cssText = 'max-width: 850px; width: 92%;';
-    
-    var header = document.createElement('div');
-    header.className = 'context-modal-header';
-    header.innerHTML = '<h2>Analisis TOP: ' + homeName + ' vs ' + awayName + '</h2>';
-    var closeBtn = document.createElement('button');
-    closeBtn.className = 'btn btn-sm';
-    closeBtn.textContent = 'X';
-    closeBtn.onclick = function() { modal.remove(); };
-    header.appendChild(closeBtn);
-    
-    var body = document.createElement('div');
-    body.className = 'context-modal-body';
-    
-    var desc = document.createElement('p');
-    desc.style.cssText = 'margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;';
-    desc.textContent = 'Reporte completo con TODAS las estadisticas. Copia y pega en el chat del asistente IA.';
-    body.appendChild(desc);
-    
-    var textarea = document.createElement('textarea');
-    textarea.id = 'ai-report-text';
-    textarea.style.cssText = 'width: 100%; height: 450px; background: rgba(0,0,0,0.4); border: 1px solid var(--border-color); color: #e2e8f0; font-family: monospace; font-size: 0.82rem; padding: 12px; border-radius: 8px; resize: vertical; line-height: 1.5;';
-    textarea.readOnly = true;
-    textarea.value = md;
-    body.appendChild(textarea);
-    
-    var btnContainer = document.createElement('div');
-    btnContainer.style.cssText = 'margin-top: 15px; display: flex; gap: 10px;';
-    var copyBtn = document.createElement('button');
-    copyBtn.className = 'btn btn-primary btn-lg';
-    copyBtn.style.cssText = 'flex: 1; font-size: 1rem; background: linear-gradient(135deg, #10b981, #059669);';
-    copyBtn.textContent = 'Copiar Reporte Completo';
-    copyBtn.onclick = function() {
-        textarea.select();
-        navigator.clipboard.writeText(textarea.value).then(function() {
-            copyBtn.textContent = 'Copiado!';
-            setTimeout(function() { copyBtn.textContent = 'Copiar Reporte Completo'; }, 2000);
-        }).catch(function() {
-            document.execCommand('copy');
-            copyBtn.textContent = 'Copiado!';
-            setTimeout(function() { copyBtn.textContent = 'Copiar Reporte Completo'; }, 2000);
-        });
-    };
-    btnContainer.appendChild(copyBtn);
-    body.appendChild(btnContainer);
-    
-    modalContent.appendChild(header);
-    modalContent.appendChild(body);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
+    lastDeepAnalysisData = { req: bodyPayload, data: data };
+    renderDeepAnalysisModal(homeName, awayName, data);
 }
 
+function renderDeepAnalysisModal(homeName, awayName, data) {
+    document.getElementById('da-modal-title').innerHTML = `&#128293; Análisis Profundo: ${homeName} vs ${awayName}`;
+    const body = document.getElementById('da-modal-body');
+    body.innerHTML = '';
+
+    function renderMatchesSection(title, matches) {
+        if (!matches || matches.length === 0) return '';
+        let html = `<h4 style="margin-top:20px; margin-bottom:10px; color:var(--accent-color); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">${title}</h4>`;
+        
+        matches.forEach(m => {
+            const info = m.match_info || {};
+            const stats = m.statistics || [];
+            
+            html += `<div style="background:rgba(0,0,0,0.3); border-radius:8px; padding:12px; margin-bottom:15px; border:1px solid rgba(255,255,255,0.05);">`;
+            html += `<div style="font-weight:bold; margin-bottom:8px;">${info.date || ''} | ${info.competition || ''} | ${info.home || '?'} ${info.home_score ?? '-'} - ${info.away_score ?? '-'} ${info.away || '?'}</div>`;
+            
+            stats.forEach(period => {
+                html += `<div style="margin-top:10px; font-size:0.9rem; color:#cbd5e1; font-weight:bold;">--- ${period.period || 'Periodo'} ---</div>`;
+                const groups = period.groups || [];
+                groups.forEach(group => {
+                    html += `<div style="margin-top:5px; font-size:0.85rem; color:#94a3b8;">[${group.groupName || 'Stats'}]</div>`;
+                    const items = group.statisticsItems || [];
+                    html += `<table style="width:100%; font-size:0.8rem; margin-bottom:5px;">`;
+                    items.forEach(item => {
+                        html += `<tr>
+                            <td style="width:20%; text-align:right; color:#a5f3fc;">${item.home ?? '-'}</td>
+                            <td style="width:60%; text-align:center;">${item.name || ''}</td>
+                            <td style="width:20%; text-align:left; color:#a5f3fc;">${item.away ?? '-'}</td>
+                        </tr>`;
+                    });
+                    html += `</table>`;
+                });
+            });
+            html += `</div>`;
+        });
+        return html;
+    }
+
+    body.innerHTML += renderMatchesSection(`Últimos 10 — ${homeName}`, data.home_last10);
+    body.innerHTML += renderMatchesSection(`Últimos 10 — ${awayName}`, data.away_last10);
+    body.innerHTML += renderMatchesSection('H2H (Cara a Cara)', data.h2h);
+
+    document.getElementById('deep-analysis-modal').style.display = 'flex';
+}
+
+function closeDeepAnalysisModal() {
+    document.getElementById('deep-analysis-modal').style.display = 'none';
+}
+
+async function downloadDeepAnalysisPDF() {
+    if (!lastDeepAnalysisData) {
+        showToast("No hay datos para generar el PDF", "error");
+        return;
+    }
+    
+    showToast("Generando PDF...", "info");
+    try {
+        const response = await fetch(API_BASE + '/analyze/match/pdf', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                home_name: lastDeepAnalysisData.req.home_name,
+                away_name: lastDeepAnalysisData.req.away_name,
+                data: lastDeepAnalysisData.data
+            })
+        });
+        
+        if (!response.ok) throw new Error("Network response was not ok");
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Analysis_${lastDeepAnalysisData.req.home_name}_vs_${lastDeepAnalysisData.req.away_name}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
+        console.error("PDF download error:", e);
+        showToast("Error al descargar PDF", "error");
+    }
+}
+
+// ==================== LIVE ALERT ENGINE ====================
+async function startLiveAlerts() {
+    const res = await apiCall('/alerts/live/start', 'POST');
+    if (res && res.status === 'success') {
+        showToast('Motor de alertas iniciado. Recibirás alertas en Telegram.', 'success');
+        updateLiveAlertStatus();
+    } else {
+        showToast('Error al iniciar alertas', 'error');
+    }
+}
+
+async function stopLiveAlerts() {
+    const res = await apiCall('/alerts/live/stop', 'POST');
+    if (res && res.status === 'success') {
+        showToast('Motor de alertas detenido', 'info');
+        updateLiveAlertStatus();
+    }
+}
+
+async function updateLiveAlertStatus() {
+    const res = await apiCall('/alerts/live/status');
+    if (!res) return;
+
+    const badge = document.getElementById('live-alert-status-badge');
+    const count = document.getElementById('alerts-sent-count');
+
+    if (badge) {
+        if (res.running) {
+            badge.textContent = '● ACTIVO';
+            badge.style.background = 'rgba(16,185,129,0.2)';
+            badge.style.color = '#10b981';
+        } else {
+            badge.textContent = 'DETENIDO';
+            badge.style.background = 'rgba(239,68,68,0.2)';
+            badge.style.color = '#ef4444';
+        }
+    }
+    if (count) {
+        count.textContent = res.alerts_sent_today || 0;
+    }
+}
+
+// Intercept loadModels to update alert status
+if (typeof loadModels === 'function') {
+    const _origLoadModels = loadModels;
+    window.loadModels = async function() {
+        await _origLoadModels();
+        updateLiveAlertStatus();
+    };
+}
+
+// Update status every 30 seconds if on models section
+setInterval(() => {
+    if (appState && appState.currentSection === 'models') {
+        updateLiveAlertStatus();
+    }
+}, 30000);

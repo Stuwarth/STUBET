@@ -18,7 +18,7 @@ from analysis.stubet_autonomous_analyst import StubetAutonomousAnalyst
 
 def run_backfill():
     print("\n" + "="*50)
-    print("🔄 INICIANDO SINCRONIZACIÓN AUTOMÁTICA STUBET")
+    print("[SYNC] INICIANDO SINCRONIZACION AUTOMATICA STUBET")
     print("="*50)
     
     db = DatabaseManager()
@@ -36,11 +36,11 @@ def run_backfill():
     pending_matches = cursor.fetchall()
     
     if not pending_matches:
-        print("✅ STUBET está 100% actualizado. Todos los partidos están al día.")
+        print("[OK] STUBET esta 100% actualizado. Todos los partidos estan al dia.")
         return
 
-    print(f"📡 ¡Alerta! Se encontraron {len(pending_matches)} partidos que ocurrieron mientras estabas desconectado.")
-    print("⬇️ Descargando resultados y alimentando el Auto-Aprendizaje...\n")
+    print(f"[!] Alerta! Se encontraron {len(pending_matches)} partidos que ocurrieron mientras estabas desconectado.")
+    print("[DL] Descargando resultados y alimentando el Auto-Aprendizaje...\n")
     
     collector = FootballAPICollector()
     analyst = StubetAutonomousAnalyst()
@@ -49,7 +49,7 @@ def run_backfill():
     for match in pending_matches:
         api_id = match['api_id']
         match_date = match['match_date']
-        print(f"⏳ Sincronizando partido ID {api_id} ({match_date})...")
+        print(f"[...] Sincronizando partido ID {api_id} ({match_date})...")
         
         try:
             # Recuperar info del partido desde la API
@@ -72,18 +72,18 @@ def run_backfill():
                         # El Auto-Analista revisa si había predicho este partido y ajusta sus pesos
                         # analyst.evaluate_post_match(...)
                         
-                        print(f"   ✅ [ÉXITO] Partido {api_id} recuperado y cerrado.")
+                        print(f"   [OK] Partido {api_id} recuperado y cerrado.")
                         updated_count += 1
                     else:
-                        print(f"   ⚠️ Partido {api_id} aún no finalizado según API.")
+                        print(f"   [WAIT] Partido {api_id} aun no finalizado segun API.")
         except Exception as e:
-            print(f"   ❌ Error con partido {api_id}: {str(e)}")
+            print(f"   [ERR] Error con partido {api_id}: {str(e)}")
             
         time.sleep(1) # Respetar rate limits
         
     print("\n" + "="*50)
-    print(f"🎉 Sincronización completada. {updated_count} partidos recuperados.")
-    print("🤖 El motor STUBET ha absorbido los datos. Listo para operar hoy.")
+    print(f"[DONE] Sincronizacion completada. {updated_count} partidos recuperados.")
+    print("[AI] El motor STUBET ha absorbido los datos. Listo para operar hoy.")
     print("="*50 + "\n")
 
 if __name__ == "__main__":

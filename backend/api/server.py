@@ -48,6 +48,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from api.deep_analyze import router as deep_analyze_router
+app.include_router(deep_analyze_router)
+
 # Serve frontend
 FRONTEND_DIR = Path(__file__).parent.parent.parent / "frontend"
 if FRONTEND_DIR.exists():
@@ -64,6 +67,24 @@ telegram = TelegramNotifier()
 stealth_scraper = PlaywrightOddsScraper(db, predictor, telegram)
 sofascore_collector = SofaScoreCollector(db)
 autonomous_analyst = StubetAutonomousAnalyst()
+
+from analysis.live_alert_engine import LiveAlertEngine
+live_alert_engine = LiveAlertEngine(
+    telegram_notifier=telegram,
+    odds_scraper=stealth_scraper,
+    news_scraper=news_scraper
+)
+
+@app.on_event("startup")
+async def startup_event():
+    pass
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    try:
+        await live_alert_engine.stop()
+    except Exception:
+        pass
 
 SOFASCORE_BASE_URL = "https://www.sofascore.com/api/v1"
 SOFASCORE_HEADERS = {
@@ -1100,6 +1121,117 @@ async def health():
 async def get_leagues():
     """Get supported leagues."""
     return {"leagues": [{"id": k, "name": v} for k, v in SUPPORTED_LEAGUES.items()]}
+
+
+@app.get("/api/dashboard/real")
+async def get_real_dashboard():
+    """Dashboard data based on REAL manual picks & bankroll, not ML pipeline."""
+    from collections import defaultdict
+    month = _get_current_month()
+
+    bankroll = db.get_bankroll(month, bookmaker=None)
+    picks_all = db.get_manual_picks(month, bookmaker=None)
+
+    if not isinstance(picks_all, list):
+        picks_all = []
+
+    won   = [p for p in picks_all if p.get("result") == "WON"]
+    lost  = [p for p in picks_all if p.get("result") == "LOST"]
+    pend  = [p for p in picks_all if p.get("result") not in ("WON", "LOST")]
+
+    total_invested = sum(p.get("stake", 0) for p in picks_all)
+    profit = sum((p.get("stake", 0) * p.get("odds", 1)) - p.get("stake", 0) for p in won) \
+           - sum(p.get("stake", 0) for p in lost)
+
+    total_settled = len(won) + len(lost)
+    accuracy = round((len(won) / total_settled * 100), 1) if total_settled > 0 else 0
+    roi = round((profit / total_invested * 100), 1) if total_invested > 0 else 0
+
+    # Current streak
+    settled_sorted = sorted(
+        [p for p in picks_all if p.get("result") in ("WON", "LOST")],
+        key=lambda p: p.get("date", ""),
+        reverse=True
+    )
+    streak_type = None
+    streak_count = 0
+    for p in settled_sorted:
+        r = p.get("result")
+        if streak_type is None:
+            streak_type = r
+            streak_count = 1
+        elif r == streak_type:
+            streak_count += 1
+        else:
+            break
+
+    recent = sorted(picks_all, key=lambda p: p.get("date", ""), reverse=True)[:10]
+
+    # Stats by bookmaker
+    bk_stats = {}
+    for p in picks_all:
+        bk = p.get("bookmaker", "lasplatas")
+        if bk not in bk_stats:
+            bk_stats[bk] = {"won": 0, "lost": 0, "pending": 0, "profit": 0, "invested": 0}
+        s = bk_stats[bk]
+        s["invested"] += p.get("stake", 0)
+        if p.get("result") == "WON":
+            s["won"] += 1
+            s["profit"] += (p.get("stake", 0) * p.get("odds", 1)) - p.get("stake", 0)
+        elif p.get("result") == "LOST":
+            s["lost"] += 1
+            s["profit"] -= p.get("stake", 0)
+        else:
+            s["pending"] += 1
+
+    lp = bankroll.get("lasplatas", {}) if isinstance(bankroll, dict) else {}
+    mb = bankroll.get("metabet", {}) if isinstance(bankroll, dict) else {}
+
+    # Accumulated daily profit for chart
+    daily_profit = defaultdict(float)
+    for p in sorted(picks_all, key=lambda x: x.get("date", "")):
+        day = str(p.get("date", ""))[:10]
+        if p.get("result") == "WON":
+            daily_profit[day] += (p.get("stake", 0) * p.get("odds", 1)) - p.get("stake", 0)
+        elif p.get("result") == "LOST":
+            daily_profit[day] -= p.get("stake", 0)
+
+    accumulated = []
+    running = 0
+    for day in sorted(daily_profit.keys()):
+        running += daily_profit[day]
+        accumulated.append({"date": day, "profit": round(running, 2)})
+
+    return {
+        "month": month,
+        "summary": {
+            "total_picks": len(picks_all),
+            "won": len(won),
+            "lost": len(lost),
+            "pending": len(pend),
+            "accuracy": accuracy,
+            "roi": roi,
+            "profit": round(profit, 2),
+            "total_invested": round(total_invested, 2),
+            "streak_type": streak_type,
+            "streak_count": streak_count,
+        },
+        "bankroll": {
+            "lasplatas": {
+                "starting": lp.get("starting", 0),
+                "current": lp.get("current", 0),
+                "diff": round(lp.get("current", 0) - lp.get("starting", 0), 2)
+            },
+            "metabet": {
+                "starting": mb.get("starting", 0),
+                "current": mb.get("current", 0),
+                "diff": round(mb.get("current", 0) - mb.get("starting", 0), 2)
+            }
+        },
+        "bookmaker_stats": bk_stats,
+        "recent_picks": recent,
+        "profit_chart": accumulated,
+    }
 
 
 @app.get("/api/dashboard")
@@ -3125,11 +3257,390 @@ async def get_picks(bookmaker: Optional[str] = None, date: Optional[str] = None)
     month = _get_current_month()
     return db.get_manual_picks(month, bookmaker)
 
+from rapidfuzz import fuzz, process as rfuzz_process
+
+def _normalize_team_name(name: str) -> str:
+    """Normaliza nombre de equipo para comparación."""
+    if not name:
+        return ""
+    import re, unicodedata
+    name = unicodedata.normalize("NFKD", name).encode("ascii","ignore").decode("ascii")
+    name = re.sub(r"(fc|cf|ac|sc|cd|sd|rc|as|ss|us|sk|bk|fk|if|ik)\s+", 
+                  "", name, flags=re.IGNORECASE)
+    name = re.sub(r"\s+(fc|cf|united|city|club|sport|sporting|athletic|"
+                  r"atletico|real|deportivo|olympique|dynamo|dinamo|rovers|"
+                  r"wanderers|hotspur|albion)$", 
+                  "", name, flags=re.IGNORECASE)
+    return name.lower().strip()
+
+def _match_team_fuzzy(name: str, candidate: str, threshold: int = 72) -> bool:
+    """Retorna True si los nombres son suficientemente similares."""
+    n1 = _normalize_team_name(name)
+    n2 = _normalize_team_name(candidate)
+    if not n1 or not n2:
+        return False
+    score = max(
+        fuzz.ratio(n1, n2),
+        fuzz.partial_ratio(n1, n2),
+        fuzz.token_sort_ratio(n1, n2)
+    )
+    return score >= threshold
+
+def _parse_pick_teams(match_name: str):
+    """
+    Extrae local y visitante del nombre del pick.
+    Soporta formatos: "Local vs Visitante", "Local - Visitante"
+    """
+    import re
+    if not match_name:
+        return None, None
+    
+    # Para combinadas, no se puede resolver automáticamente por partido
+    if 'COMBINADA' in match_name.upper() or '+' in match_name:
+        return None, None
+    
+    for sep in [' vs ', ' VS ', ' - ', ' v ']:
+        parts = match_name.split(sep, 1)
+        if len(parts) == 2:
+            return parts[0].strip(), parts[1].strip()
+    return None, None
+
+def _resolve_market(market: str, home_score: int, away_score: int, 
+                    home_name: str, away_name: str,
+                    pick_home: str, pick_away: str) -> Optional[str]:
+    """
+    Determina si un mercado fue WON o LOST dado el resultado final.
+    Retorna 'WON', 'LOST', o None si no puede determinar.
+    """
+    if home_score is None or away_score is None:
+        return None
+    
+    total_goals = home_score + away_score
+    market_lower = market.lower().strip()
+    
+    import re
+    
+    # ── Over/Under goles ──────────────────────────────────────
+    ou_match = re.search(r'(over|under|más de|mas de|menos de)\s*(\d+\.?\d*)', 
+                         market_lower)
+    if ou_match:
+        direction = ou_match.group(1)
+        line = float(ou_match.group(2))
+        if 'over' in direction or 'más' in direction or 'mas' in direction:
+            return 'WON' if total_goals > line else 'LOST'
+        else:
+            return 'WON' if total_goals < line else 'LOST'
+    
+    # ── BTTS (ambos marcan) ───────────────────────────────────
+    if any(k in market_lower for k in ['btts', 'ambos marcan', 
+                                        'both teams', 'gg', 'g/g']):
+        btts = home_score > 0 and away_score > 0
+        if any(k in market_lower for k in ['si', 'yes', 'gg']):
+            return 'WON' if btts else 'LOST'
+        if any(k in market_lower for k in ['no', 'ng', 'n/g']):
+            return 'WON' if not btts else 'LOST'
+        return 'WON' if btts else 'LOST'
+    
+    # ── 1X2 resultado ─────────────────────────────────────────
+    # Determinar si el equipo de la apuesta es local o visitante
+    pick_is_home = True
+    if pick_home and home_name:
+        pick_is_home = _match_team_fuzzy(pick_home, home_name)
+    
+    if any(k in market_lower for k in ['local gana', 'home win', 
+                                        '1 gana', 'victoria local',
+                                        'gana el local']):
+        return 'WON' if home_score > away_score else 'LOST'
+    
+    if any(k in market_lower for k in ['visitante gana', 'away win',
+                                        '2 gana', 'victoria visitante',
+                                        'gana el visitante']):
+        return 'WON' if away_score > home_score else 'LOST'
+    
+    if any(k in market_lower for k in ['empate', 'draw', 'x gana',
+                                        '1x2 empate']):
+        return 'WON' if home_score == away_score else 'LOST'
+    
+    # Formato "1" sola o "2" sola o "X"
+    market_strip = market.strip()
+    if market_strip == '1':
+        return 'WON' if home_score > away_score else 'LOST'
+    if market_strip == '2':
+        return 'WON' if away_score > home_score else 'LOST'
+    if market_strip == 'X':
+        return 'WON' if home_score == away_score else 'LOST'
+    
+    # Doble oportunidad
+    if '1x' in market_lower:
+        return 'WON' if home_score >= away_score else 'LOST'
+    if 'x2' in market_lower:
+        return 'WON' if away_score >= home_score else 'LOST'
+    if '12' in market_lower:
+        return 'WON' if home_score != away_score else 'LOST'
+    
+    # ── Handicap asiático ─────────────────────────────────────
+    hc_match = re.search(
+        r'handicap\s*([+-]?\d+\.?\d*)|([+-]\d+\.?\d*)\s*handicap|'
+        r'hc\s*([+-]?\d+\.?\d*)', 
+        market_lower
+    )
+    if hc_match:
+        hc_val_str = hc_match.group(1) or hc_match.group(2) or hc_match.group(3)
+        if hc_val_str:
+            hc = float(hc_val_str)
+            # Determinar si el handicap es para local o visitante
+            # Si el mercado menciona el equipo local/visitante
+            team_is_home = True
+            if pick_home:
+                team_is_home = _match_team_fuzzy(pick_home, home_name or "")
+            
+            if team_is_home:
+                adjusted = home_score + hc - away_score
+            else:
+                adjusted = away_score + hc - home_score
+            
+            if adjusted > 0:
+                return 'WON'
+            elif adjusted < 0:
+                return 'LOST'
+            else:
+                return None  # Push/empate en línea exacta
+    
+    # ── Over corners ─────────────────────────────────────────
+    # No podemos resolver esto sin datos de corners, retornar None
+    if 'corner' in market_lower or 'córner' in market_lower:
+        return None
+    
+    # ── Over tarjetas ─────────────────────────────────────────
+    if any(k in market_lower for k in ['tarjet', 'card', 'amarill']):
+        return None  # Necesitaría datos de tarjetas
+    
+    return None  # No se pudo determinar
+
+async def _find_sofascore_match(pick_home: str, pick_away: str, 
+                                 pick_date: str) -> Optional[Dict]:
+    """
+    Busca un partido en SofaScore por nombres de equipos y fecha.
+    Usa la fecha del pick para acotar la búsqueda.
+    """
+    from datetime import datetime, timezone, timedelta
+    
+    try:
+        # Convertir fecha del pick a string YYYY-MM-DD
+        if isinstance(pick_date, str):
+            date_str = pick_date[:10]
+        else:
+            date_str = str(pick_date)[:10]
+        
+        # Buscar en SofaScore schedule de ese día
+        schedule = await news_scraper.get_sofascore_schedule(date_str)
+        
+        if not schedule:
+            # Intentar el día siguiente también (partido nocturno)
+            try:
+                dt = datetime.strptime(date_str, "%Y-%m-%d")
+                next_day = (dt + timedelta(days=1)).strftime("%Y-%m-%d")
+                schedule2 = await news_scraper.get_sofascore_schedule(next_day)
+                if schedule2:
+                    schedule = (schedule or []) + schedule2
+            except:
+                pass
+        
+        if not schedule:
+            return None
+        
+        for match in schedule:
+            home_team = match.get("home_team",{})
+            away_team = match.get("away_team",{})
+            
+            home_name = home_team.get("name","") if isinstance(home_team,dict) \
+                        else str(home_team)
+            away_name = away_team.get("name","") if isinstance(away_team,dict) \
+                        else str(away_team)
+            
+            if (_match_team_fuzzy(pick_home, home_name) and 
+                _match_team_fuzzy(pick_away, away_name)):
+                return match
+            
+            # Probar invertido (el pick puede tener los equipos al revés)
+            if (_match_team_fuzzy(pick_home, away_name) and 
+                _match_team_fuzzy(pick_away, home_name)):
+                return match
+        
+        return None
+    except Exception as e:
+        print(f"[AutoResolve] Error buscando partido: {e}")
+        return None
+
 @app.post("/api/picks/auto-resolve")
 async def auto_resolve_picks():
-    """Intenta resolver automÃ¡ticamente picks pendientes usando SofaScore."""
-    # TODO: Implement full matching logic. For now return a message.
-    return {"status": "success", "message": "Funcionalidad de seguimiento automÃ¡tico en desarrollo."}
+    """
+    Auto-resuelve picks pendientes usando resultados de SofaScore.
+    Solo resuelve picks cuyo partido ya terminó.
+    """
+    from datetime import datetime, timezone
+    
+    try:
+        month = datetime.now().strftime("%Y-%m")
+        all_picks = db.get_manual_picks(month, bookmaker=None)
+        
+        if not isinstance(all_picks, list):
+            return {"status": "success", "resolved": 0, 
+                    "skipped": 0, "message": "Sin picks"}
+        
+        pending = [p for p in all_picks 
+                   if p.get("result") not in ("WON", "LOST")]
+        
+        if not pending:
+            return {"status": "success", "resolved": 0, 
+                    "skipped": 0, "message": "No hay picks pendientes"}
+        
+        resolved = 0
+        skipped = 0
+        failed = 0
+        details = []
+        
+        for pick in pending:
+            match_name = pick.get("match", "")
+            market = pick.get("market", "")
+            pick_date = pick.get("date", "")
+            
+            # Saltar combinadas
+            if 'COMBINADA' in match_name.upper():
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped",
+                    "reason": "Combinada - resolver manual"
+                })
+                continue
+            
+            pick_home, pick_away = _parse_pick_teams(match_name)
+            if not pick_home or not pick_away:
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped", 
+                    "reason": "No se pudo parsear equipos"
+                })
+                continue
+            
+            # Buscar partido en SofaScore
+            match_data = await _find_sofascore_match(
+                pick_home, pick_away, pick_date
+            )
+            
+            if not match_data:
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped",
+                    "reason": "Partido no encontrado en SofaScore"
+                })
+                continue
+            
+            # Verificar que el partido terminó
+            status_type = str(
+                match_data.get("status_type","")
+            ).lower()
+            
+            if status_type not in ("finished","aet","afterpens",
+                                   "ft","ended"):
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped",
+                    "reason": f"Partido no finalizado: {status_type}"
+                })
+                continue
+            
+            # Obtener marcador
+            home_team = match_data.get("home_team", {})
+            away_team = match_data.get("away_team", {})
+            
+            if isinstance(home_team, dict):
+                home_score = home_team.get("score")
+                home_name  = home_team.get("name","")
+            else:
+                home_score = None
+                home_name  = ""
+            
+            if isinstance(away_team, dict):
+                away_score = away_team.get("score")
+                away_name  = away_team.get("name","")
+            else:
+                away_score = None
+                away_name  = ""
+            
+            try:
+                home_score = int(home_score) if home_score is not None else None
+                away_score = int(away_score) if away_score is not None else None
+            except (ValueError, TypeError):
+                home_score = None
+                away_score = None
+            
+            if home_score is None or away_score is None:
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped",
+                    "reason": "Marcador no disponible"
+                })
+                continue
+            
+            # Resolver mercado
+            result = _resolve_market(
+                market, home_score, away_score,
+                home_name, away_name,
+                pick_home, pick_away
+            )
+            
+            if result is None:
+                skipped += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "skipped",
+                    "reason": f"Mercado '{market}' requiere resolución manual",
+                    "score": f"{home_name} {home_score}-{away_score} {away_name}"
+                })
+                continue
+            
+            # Guardar resultado
+            success = db.settle_manual_pick(pick["id"], result)
+            if success:
+                resolved += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "resolved",
+                    "result": result,
+                    "score": f"{home_name} {home_score}-{away_score} {away_name}",
+                    "market": market
+                })
+            else:
+                failed += 1
+                details.append({
+                    "pick": match_name,
+                    "status": "failed",
+                    "reason": "Error al guardar en DB"
+                })
+        
+        return {
+            "status": "success",
+            "resolved": resolved,
+            "skipped": skipped,
+            "failed": failed,
+            "total_pending": len(pending),
+            "details": details,
+            "message": f"Resueltos {resolved}/{len(pending)} picks automáticamente"
+        }
+        
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "message": str(e),
+            "trace": traceback.format_exc()
+        }
 
 @app.post("/api/picks")
 async def add_pick(req: ManualPickReq):
@@ -3181,15 +3692,73 @@ async def update_pick(pick_id: int, req: ManualPickReq):
     raise HTTPException(status_code=400, detail="No se pudo actualizar (quizás ya está resuelto o no existe).")
 
 class SettlePickReq(BaseModel):
-    result: str  # 'WON', 'LOST', or 'PENDING'
+    result: str  # 'WON', 'LOST', 'VOID', 'CASHOUT', 'HALF_WON', 'HALF_LOST'
+    cashout_amount: Optional[float] = None
 
 @app.post("/api/picks/{pick_id}/settle")
 async def settle_pick(pick_id: int, req: SettlePickReq):
-    """Marcar apuesta como ganada o perdida."""
-    success = db.settle_manual_pick(pick_id, req.result.upper())
+    """Marcar apuesta como resuelta."""
+    success = db.settle_manual_pick(pick_id, req.result.upper(), req.cashout_amount)
     if success:
         return {"status": "success"}
     raise HTTPException(status_code=400, detail="No se pudo resolver el pick (quizás ya está resuelto o no existe).")
+
+class ParlayLegReq(BaseModel):
+    match_name: str
+    market: str
+    odds: float
+    is_draw_no_bet: bool = False
+
+class ParlayReq(BaseModel):
+    stake: float
+    bookmaker: str = 'lasplatas'
+    placed_at: Optional[str] = None
+    legs: List[ParlayLegReq]
+
+@app.post("/api/picks/parlay")
+async def add_parlay_pick(req: ParlayReq):
+    """Agregar apuesta combinada con múltiples patas."""
+    month = _get_current_month()
+    combined_odds = 1.0
+    for leg in req.legs:
+        combined_odds *= leg.odds
+        
+    pick_data = {
+        "month_year": month,
+        "match_name": "Apuesta Combinada (" + str(len(req.legs)) + " selecciones)",
+        "market": "Combinada Múltiple",
+        "odds": float(combined_odds),
+        "stake": req.stake,
+        "bookmaker": req.bookmaker,
+        "placed_at": req.placed_at,
+        "bet_type": "parlay"
+    }
+    pick_id = db.add_manual_pick(pick_data)
+    
+    # Add legs
+    for leg in req.legs:
+        db.add_parlay_leg(pick_id, {
+            "match_name": leg.match_name,
+            "market": leg.market,
+            "odds": leg.odds,
+            "is_draw_no_bet": 1 if leg.is_draw_no_bet else 0
+        })
+        
+    return {"status": "success", "id": pick_id}
+
+@app.get("/api/picks/{pick_id}/legs")
+async def get_parlay_legs(pick_id: int):
+    """Obtener patas de una apuesta combinada."""
+    legs = db.get_parlay_legs(pick_id)
+    return {"legs": legs}
+
+@app.post("/api/picks/parlay/leg/{leg_id}/settle")
+async def settle_parlay_leg(leg_id: int, req: SettlePickReq):
+    """Resolver una sola pata de una combinada."""
+    success = db.settle_parlay_leg(leg_id, req.result.upper())
+    if success:
+        return {"status": "success"}
+    raise HTTPException(status_code=400, detail="Error resolviendo pata.")
 
 class TicketReq(BaseModel):
     ticket_id: str
@@ -3210,24 +3779,83 @@ async def scan_ticket(req: TicketReq):
         "Accept": "application/json, text/html, */*"
     }
 
-    # ==================== METABET (Link-based) ====================
+    # ==================== METABET (Link o Texto) ====================
     if bookmaker == "metabet":
+        import re
+        
+        # 1. Evaluar si es un texto copiado del cupón (múltiples líneas o no es solo una URL)
+        is_url = input_val.startswith("http") and len(input_val.split()) == 1
+        
+        if not is_url:
+            # Procesar como texto de cupón
+            match_name = "Partido Metabet"
+            market_name = "Mercado"
+            odds_val = 0.0
+            stake_val = 0.0
+            
+            lines = [line.strip() for line in input_val.split('\n') if line.strip()]
+            
+            # Buscar cuota y monto con regex
+            for line in lines:
+                cuota_match = re.search(r'(?i)(?:cuota|odds|@)\s*[:\-]?\s*(\d+\.\d+)', line)
+                if cuota_match:
+                    odds_val = float(cuota_match.group(1))
+                elif re.search(r'^\d+\.\d+$', line):
+                    # Aveces la cuota está en una línea sola
+                    odds_val = float(line)
+                
+                monto_match = re.search(r'(?i)(?:monto|stake|importe|apuesta|total)\s*[:\-]?\s*(?:bs|usd|\$)?\s*(\d+(?:\.\d+)?)', line)
+                if monto_match:
+                    stake_val = float(monto_match.group(1))
+                    
+            # Si hay líneas, intentar deducir partido y mercado
+            # Normalmente la línea con "vs" o "-" es el partido
+            for line in lines:
+                if ' vs ' in line.lower() or ' - ' in line:
+                    match_name = line
+                    break
+            
+            # Si no encontró "vs", asume que la primera línea de texto real es el partido
+            content_lines = [l for l in lines if not re.search(r'(?i)(cuota|odds|monto|stake|importe|apuesta|ganancia|total|id|fecha|hora)', l) and not re.match(r'^\d+(\.\d+)?$', l)]
+            
+            if match_name == "Partido Metabet" and len(content_lines) > 0:
+                match_name = content_lines[0]
+                
+            # El mercado suele ser la línea siguiente al partido
+            if len(content_lines) > 1:
+                # Buscamos la línea que sigue al partido
+                try:
+                    idx = content_lines.index(match_name)
+                    if idx + 1 < len(content_lines):
+                        market_name = content_lines[idx + 1]
+                except ValueError:
+                    market_name = content_lines[1]
+                    
+            if odds_val > 0 or stake_val > 0 or match_name != "Partido Metabet":
+                return {
+                    "status": "success",
+                    "bookmaker": "metabet",
+                    "match": match_name[:100],
+                    "market": market_name[:100],
+                    "odds": odds_val or 1.0,
+                    "stake": stake_val or 0.0,
+                    "note": "Extraído de texto de cupón Metabet."
+                }
+                
+        # 2. Si no funcionó como texto o es directamente un URL, intentar scraping del link
         try:
             async with httpx.AsyncClient(follow_redirects=True) as client:
                 resp = await client.get(input_val, headers=headers, timeout=15)
                 if resp.status_code == 200:
                     html = resp.text
-                    # Try to extract bet info from the Metabet share page
-                    # Common patterns: team names, odds, market from the HTML/JSON
-                    import re
                     
-                    # Try JSON-LD or embedded data
                     json_match = re.search(r'window\.__INITIAL_STATE__\s*=\s*({.*?});', html, re.DOTALL)
                     if not json_match:
                         json_match = re.search(r'data-bet["\']?\s*[:=]\s*["\']?({.*?})["\']?', html, re.DOTALL)
                     
                     if json_match:
                         try:
+                            import json
                             bet_data = json.loads(json_match.group(1))
                             return {
                                 "status": "success",
@@ -3240,7 +3868,6 @@ async def scan_ticket(req: TicketReq):
                         except:
                             pass
                     
-                    # Fallback: try to extract from page title/meta tags
                     title_match = re.search(r'<title>(.*?)</title>', html, re.IGNORECASE)
                     og_match = re.search(r'og:description["\s]+content="([^"]+)"', html, re.IGNORECASE)
                     
@@ -3250,7 +3877,6 @@ async def scan_ticket(req: TicketReq):
                     if og_match:
                         match_name = og_match.group(1).strip()
                     
-                    # Try to find odds in the page
                     odds_matches = re.findall(r'(?:cuota|odds?|price)["\s:]+(\d+\.?\d*)', html, re.IGNORECASE)
                     found_odds = float(odds_matches[0]) if odds_matches else 0.0
                     
@@ -3261,7 +3887,7 @@ async def scan_ticket(req: TicketReq):
                         "market": "Extraido de link Metabet",
                         "odds": found_odds,
                         "stake": 0.0,
-                        "note": "Verifica los datos. Link procesado pero puede requerir ajuste manual."
+                        "note": "Link procesado. Verifica los datos."
                     }
         except Exception as e:
             print(f"[Metabet Scraper Error] {e}")
@@ -3269,13 +3895,12 @@ async def scan_ticket(req: TicketReq):
         return {
             "status": "error",
             "bookmaker": "metabet",
-            "message": f"No se pudo leer el link de Metabet. Ingresa los datos manualmente.",
-            "match": f"Link Metabet",
+            "message": "No se pudo extraer información del cupón o link. Ingresa los datos manualmente.",
+            "match": "Partido Metabet",
             "market": "N/A",
             "odds": 0.0,
             "stake": 0.0
         }
-
     # ==================== LASPLATAS (Code-based) ====================
     code = input_val.upper()
     
@@ -3354,6 +3979,20 @@ async def scan_ticket(req: TicketReq):
         "odds": 0.0,
         "stake": 0.0
     }
+
+@app.post("/api/alerts/live/start")
+async def start_live_alerts():
+    await live_alert_engine.start()
+    return {"status": "success", "running": True, "message": "Motor de alertas en vivo iniciado"}
+
+@app.post("/api/alerts/live/stop")
+async def stop_live_alerts():
+    await live_alert_engine.stop()
+    return {"status": "success", "running": False, "message": "Motor de alertas detenido"}
+
+@app.get("/api/alerts/live/status")
+async def get_live_alerts_status():
+    return live_alert_engine.get_status()
 
 # ==================== RUN ====================
 
